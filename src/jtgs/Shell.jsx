@@ -69,7 +69,7 @@ export function Shell({ v }) {
           </div>
         </div>
 
-        <div className="fass-scroll sidebar-scroll flex-1 overflow-y-auto py-2" onScroll={onSidebarScroll}>
+        <div className="fass-scroll sidebar-scroll flex-1 overflow-y-auto py-3" onScroll={onSidebarScroll}>
           {(navRows || []).map((row, row__i) => (
             <React.Fragment key={row__i}>
               {row.isGroup ? <div className="fass-nav-group">{row.label}</div> : null}
@@ -101,21 +101,27 @@ export function Shell({ v }) {
       </nav>
 
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <header className="h-14 shrink-0 flex items-center gap-3 px-5 bg-[var(--fass-surface)] border-b border-[var(--fass-line)] shadow-[var(--shadow-sm)]">
+        <header className="h-14 shrink-0 flex items-center gap-3 px-6 bg-[var(--fass-surface)] border-b border-[var(--fass-line)] shadow-[var(--shadow-sm)]">
           <button type="button" className="fass-btn is-secondary is-sm md:hidden" onClick={toggleSidebar}>
             메뉴
           </button>
           <h1 className="fass-title-page whitespace-nowrap shrink-0 m-0">{headTitle}</h1>
-          <span className="fass-muted min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{headSub}</span>
+          <span className="hidden sm:block fass-muted min-w-0 overflow-hidden text-ellipsis whitespace-nowrap max-w-[42%]">{headSub}</span>
           <div className="flex-1" />
           {loading ? <span className="fass-subtle text-[var(--fass-accent)] font-semibold">로딩…</span> : null}
           <button type="button" className="fass-btn is-secondary is-sm shrink-0" onClick={refreshAll}>새로고침</button>
         </header>
 
-        <div className="fass-scroll flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
+        <div
+          className={
+            isGrid
+              ? "flex-1 min-h-0 flex flex-col overflow-hidden px-6 py-5 gap-5"
+              : "fass-scroll flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-6"
+          }
+        >
           {isGrid ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex flex-col gap-5 flex-1 min-h-0">
+              <div className="flex items-center gap-3 flex-wrap shrink-0">
                 <span className="fass-label shrink-0">{segLabel}</span>
                 <div className="flex gap-1 p-1 bg-[var(--fass-surface)] border border-[var(--fass-line)] rounded-md shadow-[var(--shadow-sm)] flex-wrap">
                   {(segments || []).map((seg, seg__i) => (
@@ -130,11 +136,11 @@ export function Shell({ v }) {
                     </button>
                   ))}
                 </div>
-                <span className="ml-auto fass-subtle">{segNote}</span>
+                <span className="ml-auto fass-subtle hidden md:inline">{segNote}</span>
               </div>
 
               <section aria-label="조회 조건" className="fass-panel shrink-0">
-                <div className="fass-panel__head !px-3">
+                <div className="fass-panel__head">
                   <strong className="fass-title-section shrink-0">조회 조건</strong>
                   <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap fass-label">{summary}</span>
                   <button type="button" className="fass-btn is-secondary is-sm ml-auto shrink-0" onClick={toggleCollapse}>
@@ -142,10 +148,10 @@ export function Shell({ v }) {
                   </button>
                 </div>
                 {expanded ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3 p-3">
-                    <div className="min-w-0 grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] items-end gap-x-3 gap-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-4 p-4">
+                    <div className="min-w-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] items-end gap-x-4 gap-y-3">
                       {(filters || []).map((f, f__i) => (
-                        <div key={f__i} className="flex flex-col gap-1">
+                        <div key={f__i} className="flex flex-col gap-1.5">
                           <label className="fass-label">{f.label}</label>
                           {f.isSelect ? (
                             <select className="fass-field" value={f.value} onChange={f.onChange}>
@@ -160,7 +166,7 @@ export function Shell({ v }) {
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center justify-end gap-1.5">
+                    <div className="flex items-center justify-end gap-2">
                       <button type="button" className="fass-btn is-ghost" onClick={doResetFilters}>초기화</button>
                       <button type="button" className="fass-btn is-primary" onClick={doSearch}>조회</button>
                     </div>
@@ -168,31 +174,30 @@ export function Shell({ v }) {
                 ) : null}
               </section>
 
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-2.5">
-                {(metrics || []).map((m, m__i) => (
-                  <div key={m__i} className="fass-metric">
-                    <span className="fass-label leading-none">{m.label}</span>
-                    <div className="flex items-baseline gap-1">
-                      <span style={m.valueStyle}>{m.value}</span>
-                      <span className="text-sm font-normal text-[var(--fass-muted)] leading-none">{m.unit}</span>
+              {(metrics || []).length > 0 ? (
+                <div className="fass-metric-strip shrink-0" role="group" aria-label="요약 지표">
+                  {(metrics || []).map((m, m__i) => (
+                    <div key={m__i} className="fass-metric-strip__item" title={m.note || undefined}>
+                      <span className="fass-metric-strip__label">{m.label}</span>
+                      <span className="fass-metric-strip__value" style={{ color: m.valueColor }}>{m.value}</span>
+                      <span className="fass-metric-strip__unit">{m.unit}</span>
                     </div>
-                    <span className="fass-subtle leading-none">{m.note}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : null}
 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2 h-[42px] px-2 bg-[var(--fass-surface)] border border-[var(--fass-line)] border-b-0 rounded-t-[var(--fass-radius-lg)]">
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex items-center gap-2 h-[46px] px-3 bg-[var(--fass-surface)] border border-[var(--fass-line)] border-b-0 rounded-t-[var(--fass-radius-lg)] shrink-0">
                   <strong className="fass-title-section px-1 shrink-0">{gridTitle}</strong>
                   <span className="fass-subtle">{gridCount}</span>
-                  <div className="ml-auto flex items-center gap-1">
+                  <div className="ml-auto flex items-center gap-1.5">
                     {(actions || []).map((a, a__i) => (
                       <button key={a__i} type="button" className={a.className} onClick={a.onClick}>{a.label}</button>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-0 h-[38px] px-1.5 bg-[var(--fass-surface)] border-x border-b border-[var(--fass-line)]">
+                <div className="flex items-center gap-0 h-10 px-2 bg-[var(--fass-surface)] border-x border-b border-[var(--fass-line)] shrink-0">
                   {(tabs || []).map((t, t__i) => (
                     <button
                       key={t__i}
@@ -206,7 +211,7 @@ export function Shell({ v }) {
                   ))}
                 </div>
 
-                <div className="fass-scroll bg-[var(--fass-surface)] border border-t-0 border-[var(--fass-line)] rounded-b-[var(--fass-radius-lg)] overflow-auto max-h-[min(56vh,520px)]">
+                <div className="fass-scroll bg-[var(--fass-surface)] border border-t-0 border-[var(--fass-line)] rounded-b-[var(--fass-radius-lg)] overflow-auto flex-1 min-h-[320px]">
                   <table className="fass-table">
                     <thead>
                       <tr>
@@ -259,16 +264,16 @@ export function Shell({ v }) {
               </div>
 
               {mergeNote ? (
-                <div className="fass-note">
-                  <span className="fass-note__mark">통합 규칙</span>
-                  <span className="fass-note__body">{mergeNote}</span>
-                </div>
+                <details className="fass-note-details shrink-0">
+                  <summary>통합 규칙</summary>
+                  <p className="fass-note-details__body">{mergeNote}</p>
+                </details>
               ) : null}
             </div>
           ) : null}
 
           {isDash ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {loading ? <div className="skel h-16 w-full" /> : null}
               {dashTankAlert ? (
                 <div className="fass-alert" role="status">
@@ -276,7 +281,7 @@ export function Shell({ v }) {
                   <span className="fass-alert__body">{dashTankAlert}</span>
                 </div>
               ) : null}
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
                 {(dashKpis || []).map((k, k__i) => (
                   <div key={k__i} style={k.cardStyle}>
                     <span className="fass-label leading-none">{k.label}</span>
@@ -286,8 +291,8 @@ export function Shell({ v }) {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 items-stretch">
-                <div className="flex flex-col gap-4 min-w-0 h-full">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-5 items-stretch">
+                <div className="flex flex-col gap-5 min-w-0 h-full">
                   <section className="fass-panel flex flex-col flex-1 min-h-0">
                     <div className="fass-panel__head">
                       <strong className="fass-title-section">주유소별 오늘 현황</strong>
@@ -344,7 +349,7 @@ export function Shell({ v }) {
                   </section>
                 </div>
 
-                <div className="flex flex-col gap-4 min-w-0 h-full">
+                <div className="flex flex-col gap-5 min-w-0 h-full">
                   <section className="fass-panel">
                     <div className="fass-panel__head">
                       <strong className="fass-title-section">IF 처리 현황 (오늘)</strong>
@@ -418,8 +423,8 @@ export function Shell({ v }) {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start min-w-0">
-                  <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start min-w-0">
+                  <div className="flex flex-col gap-5">
                     {(stackAreas || []).map((a, a__i) => (
                       <section key={a__i} className="fass-panel">
                         <div style={a.headStyle}>
@@ -482,7 +487,7 @@ export function Shell({ v }) {
           ) : null}
 
           {isReq ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               <div className="fass-panel flex items-center gap-2.5 px-3.5 py-2.5 !overflow-visible">
                 <strong className="fass-title-section">요구사항 항목</strong>
                 <span className="fass-subtle">{reqHint}</span>
@@ -541,8 +546,8 @@ export function Shell({ v }) {
           ) : null}
 
           {isCheck ? (
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
+            <div className="flex flex-col gap-5">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
                 {(checkMetrics || []).map((m, m__i) => (
                   <div key={m__i} className="fass-metric">
                     <span className="fass-label leading-none">{m.label}</span>
@@ -582,7 +587,7 @@ export function Shell({ v }) {
           ) : null}
         </div>
 
-        <footer className="h-8 shrink-0 flex items-center justify-between px-5 bg-[var(--fass-surface)] border-t border-[var(--fass-line)] text-[var(--font-size-xs)] text-[var(--fass-muted)]">
+        <footer className="h-9 shrink-0 flex items-center justify-between px-6 bg-[var(--fass-surface)] border-t border-[var(--fass-line)] text-[var(--font-size-xs)] text-[var(--fass-muted)]">
           <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{statusLeft}</span>
           <span className="shrink-0 ml-3">{statusRight}</span>
         </footer>

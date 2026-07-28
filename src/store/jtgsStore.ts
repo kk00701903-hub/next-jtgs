@@ -72,7 +72,7 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   view: 'dash',
   seg: {},
   tab: null,
-  collapsed: false,
+  collapsed: true,
   sel: null,
   msg: '',
   modal: null,
@@ -85,7 +85,7 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   filterApplied: {},
   sidebarOpen: false,
   ifRowOverrides: {},
-  setView: (view) => set({ view, tab: null, sel: null, msg: '', sidebarOpen: false }),
+  setView: (view) => set({ view, tab: null, sel: null, msg: '', sidebarOpen: false, collapsed: true }),
   select: (gk, k) =>
     set((s) => ({
       view: gk,
@@ -94,6 +94,7 @@ export const useJtgsStore = create<JtgsState>((set) => ({
       sel: null,
       msg: '',
       sidebarOpen: false,
+      collapsed: true,
     })),
   setTab: (tab) => set({ tab, sel: null }),
   setCollapsed: (collapsed) => set({ collapsed }),

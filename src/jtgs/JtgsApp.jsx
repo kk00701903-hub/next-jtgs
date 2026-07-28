@@ -181,7 +181,7 @@ class JtgsAppCore extends ReactComponent {
   }
 
   cellStyle(align, extra) {
-    const pad = (this.props.density ?? "normal") === "compact" ? "5px 10px" : "8px 10px";
+    const pad = (this.props.density ?? "normal") === "compact" ? "6px 10px" : "10px 12px";
     return Object.assign({
       padding: pad,
       borderBottom: "1px solid var(--fass-line-soft)",
@@ -325,7 +325,7 @@ class JtgsAppCore extends ReactComponent {
     const foot = hasFoot ? footSrc.map(([v, span, align]) => ({
       v, span,
       style: {
-        padding: "9px 10px", background: "var(--fass-surface-alt)",
+        padding: "11px 12px", background: "var(--fass-surface-alt)",
         borderTop: "1px solid var(--fass-line)",
         fontWeight: 600, fontSize: "var(--font-size-sm)",
         textAlign: align === "r" ? "right" : align === "c" ? "center" : "left",
@@ -524,6 +524,7 @@ class JtgsAppCore extends ReactComponent {
       },
       metrics: (isGrid ? (isCodeMaster ? this.codeMetrics() : t.metrics) : []).map((m) => ({
         label: m.label, value: m.value, unit: m.unit, note: m.note,
+        valueColor: this.tone(m.tone),
         valueStyle: {
           fontSize: String(m.value).length > 8 ? "var(--font-size-lg)" : "var(--font-size-xl)",
           fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums",
