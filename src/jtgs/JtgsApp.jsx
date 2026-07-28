@@ -165,25 +165,11 @@ class JtgsAppCore extends ReactComponent {
     });
   }
 
-  actionStyle(variant) {
-    const base = {
-      height: "var(--fass-button-height-sm)", padding: "0 var(--fass-button-padding-x-sm)",
-      fontSize: "var(--fass-button-font-size)", fontWeight: 850,
-      borderRadius: "var(--fass-button-radius)", cursor: "pointer", whiteSpace: "nowrap",
-    };
-    if (variant === "primary") return Object.assign(base, {
-      border: "1px solid var(--fass-accent)", background: "var(--fass-accent)", color: "#fff",
-      boxShadow: "0 8px 18px color-mix(in srgb,var(--fass-accent) 22%,transparent)",
-    });
-    if (variant === "danger") return Object.assign(base, {
-      border: "1px solid var(--fass-danger)", background: "var(--fass-danger)", color: "#fff",
-    });
-    if (variant === "ghost") return Object.assign(base, {
-      border: "1px solid transparent", background: "transparent", color: "var(--fass-muted)",
-    });
-    return Object.assign(base, {
-      border: "1px solid var(--fass-line)", background: "var(--fass-surface-alt)", color: "var(--fass-text)",
-    });
+  actionClass(variant) {
+    if (variant === "primary") return "fass-btn is-primary is-sm";
+    if (variant === "danger") return "fass-btn is-danger is-sm";
+    if (variant === "ghost") return "fass-btn is-ghost is-sm";
+    return "fass-btn is-secondary is-sm";
   }
 
   tone(t) {
@@ -209,11 +195,7 @@ class JtgsAppCore extends ReactComponent {
   badgeStyle(kind) {
     const c = B[kind] || B.gray;
     return {
-      display: "inline-flex", alignItems: "center", justifyContent: "center",
-      height: "var(--fass-badge-height-md)", padding: "0 8px",
-      fontSize: "var(--fass-badge-font-size)", fontWeight: 700,
-      borderRadius: "var(--fass-badge-radius)",
-      background: c.bg, color: c.fg, whiteSpace: "nowrap",
+      background: c.bg, color: c.fg,
     };
   }
 
@@ -224,12 +206,7 @@ class JtgsAppCore extends ReactComponent {
         label,
         isErrCol: label === "오류내용",
         style: {
-          padding: "8px 10px",
           textAlign: align === "r" ? "right" : align === "c" ? "center" : "left",
-          fontSize: "var(--font-size-xs)", fontWeight: 800, color: "var(--fass-muted)",
-          background: "var(--fass-surface-alt)",
-          borderBottom: "1px solid var(--fass-line)",
-          position: "sticky", top: 0, zIndex: 1, whiteSpace: "nowrap",
           width: w ? w + "px" : undefined,
         },
       };
@@ -240,10 +217,7 @@ class JtgsAppCore extends ReactComponent {
     return raw.map((cells, i) => {
       const selected = this.props.store.sel === i;
       return {
-        style: {
-          cursor: "pointer",
-          background: selected ? "var(--fass-accent-soft)" : "transparent",
-        },
+        selected,
         onClick: () => this.props.patchStore({ sel: selected ? null : i }),
         cells: cells.map((raw, ci) => {
           const align = (cols[ci].style.textAlign === "right") ? "r" : (cols[ci].style.textAlign === "center" ? "c" : "l");
@@ -312,37 +286,14 @@ class JtgsAppCore extends ReactComponent {
     }
     navRows.forEach((r) => {
       if (!r.isItem) return;
-      const active = (isGrid && r.key === view + ":" + segKey) ||
-        (!isGrid && r.key === view);
-      r.style = {
-        display: "flex", alignItems: "center", gap: "8px",
-        padding: "8px 16px", fontSize: "14px", cursor: "pointer",
-        borderLeft: active ? "3px solid #60A5FA" : "3px solid transparent",
-        background: active ? "rgba(255,255,255,.12)" : "transparent",
-        color: active ? "#fff" : "rgba(255,255,255,.75)",
-        fontWeight: active ? 700 : 400,
-      };
+      r.active = (isGrid && r.key === view + ":" + segKey) || (!isGrid && r.key === view);
     });
 
     const segments = keys.map((k) => {
       const on = k === segKey;
       return {
         label: G.items[k].short, code: G.items[k].code,
-        style: {
-          display: "inline-flex", alignItems: "center", gap: "6px",
-          height: "32px", padding: "0 14px", borderRadius: "999px", cursor: "pointer",
-          fontSize: "var(--font-size-xs)", fontWeight: 900,
-          border: on ? "1px solid var(--fass-accent)" : "1px solid transparent",
-          background: on ? "var(--fass-accent)" : "transparent",
-          color: on ? "#fff" : "var(--fass-muted)",
-          transition: "background .15s,color .15s",
-        },
-        codeStyle: {
-          fontSize: "11px", fontWeight: 800, letterSpacing: ".02em",
-          padding: "1px 5px", borderRadius: "999px",
-          background: on ? "rgba(255,255,255,.22)" : "var(--fass-line-soft)",
-          color: on ? "#fff" : "var(--fass-subtle)",
-        },
+        active: on,
         onClick: () => this.select(view, k),
       };
     });
@@ -354,19 +305,7 @@ class JtgsAppCore extends ReactComponent {
     const tabs = tabDefs.map((d) => {
       const on = d.key === activeTab;
       return {
-        label: d.label, count: d.count,
-        style: {
-          display: "inline-flex", alignItems: "center", gap: "6px",
-          height: "100%", padding: "0 14px", border: "none", background: "transparent",
-          cursor: "pointer", fontSize: "var(--font-size-xs)", fontWeight: 900,
-          color: on ? "var(--fass-accent)" : "var(--fass-muted)",
-          boxShadow: on ? "inset 0 -2px 0 var(--fass-accent)" : "none",
-        },
-        countStyle: {
-          fontSize: "12px", fontWeight: 800, padding: "1px 6px", borderRadius: "999px",
-          background: on ? "var(--fass-accent-soft)" : "var(--fass-line-soft)",
-          color: on ? "var(--fass-accent-strong)" : "var(--fass-subtle)",
-        },
+        label: d.label, count: d.count, active: on,
         onClick: () => this.props.patchStore({ tab: d.key, sel: null }),
       };
     });
@@ -388,7 +327,7 @@ class JtgsAppCore extends ReactComponent {
       style: {
         padding: "9px 10px", background: "var(--fass-surface-alt)",
         borderTop: "1px solid var(--fass-line)",
-        fontWeight: 800, fontSize: "var(--font-size-sm)",
+        fontWeight: 600, fontSize: "var(--font-size-sm)",
         textAlign: align === "r" ? "right" : align === "c" ? "center" : "left",
         fontVariantNumeric: "tabular-nums",
         position: "sticky", bottom: 0,
@@ -397,7 +336,7 @@ class JtgsAppCore extends ReactComponent {
 
     const gridTitle = isGrid ? curTab.title : "";
     const actions = isGrid ? ACTIONS[G.actions].map(([label, variant]) => ({
-      label, style: this.actionStyle(variant),
+      label, className: this.actionClass(variant),
       onClick: () => this.openModal(label, t, cols, view, segKey),
     })) : [];
     const m = this.props.store.modal;
@@ -418,7 +357,7 @@ class JtgsAppCore extends ReactComponent {
             background: tone === "accent" ? "var(--fass-accent-soft)" : tone === "success" ? "var(--fass-success-soft)" : "var(--fass-warning-soft)",
           },
           titleStyle: {
-            fontSize: "var(--font-size-sm)", fontWeight: 900,
+            fontSize: "var(--font-size-sm)", fontWeight: 600,
             color: tone === "accent" ? "var(--fass-accent-strong)" : tone === "success" ? "#166534" : "#92400E",
           },
           count: rows.length + "개 영역",
@@ -434,7 +373,7 @@ class JtgsAppCore extends ReactComponent {
               name: n,
               style: {
                 display: "inline-flex", alignItems: "center", minHeight: "22px", padding: "3px 9px",
-                whiteSpace: "nowrap", borderRadius: "999px", fontSize: "13px", fontWeight: 800,
+                whiteSpace: "nowrap", borderRadius: "999px", fontSize: "13px", fontWeight: 600,
                 fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace",
                 background: "var(--fass-surface)", border: "1px solid var(--fass-line-strong)",
                 color: "var(--fass-text)",
@@ -444,15 +383,15 @@ class JtgsAppCore extends ReactComponent {
         };
       }),
       stackActions: [
-        { label: "항목 등록", style: this.actionStyle("primary"), onClick: () => this.openRec("stack", "add") },
-        { label: "수정", style: this.actionStyle("secondary"), onClick: () => this.openRec("stack", "edit") },
-        { label: "삭제", style: this.actionStyle("danger"), onClick: () => this.openRec("stack", "delete") },
+        { label: "항목 등록", className: this.actionClass("primary"), onClick: () => this.openRec("stack", "add") },
+        { label: "수정", className: this.actionClass("secondary"), onClick: () => this.openRec("stack", "edit") },
+        { label: "삭제", className: this.actionClass("danger"), onClick: () => this.openRec("stack", "delete") },
       ],
       stackHint: this.props.store.selRec.stack === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.props.store.stack[this.props.store.selRec.stack].cat,
       reqActions: [
-        { label: "요구사항 등록", style: this.actionStyle("primary"), onClick: () => this.openRec("req", "add") },
-        { label: "수정", style: this.actionStyle("secondary"), onClick: () => this.openRec("req", "edit") },
-        { label: "삭제", style: this.actionStyle("danger"), onClick: () => this.openRec("req", "delete") },
+        { label: "요구사항 등록", className: this.actionClass("primary"), onClick: () => this.openRec("req", "add") },
+        { label: "수정", className: this.actionClass("secondary"), onClick: () => this.openRec("req", "edit") },
+        { label: "삭제", className: this.actionClass("danger"), onClick: () => this.openRec("req", "delete") },
       ],
       reqHint: this.props.store.selRec.req === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.props.store.reqs[this.props.store.selRec.req].id,
       layers: LAYERS.map((l, i) => ({
@@ -471,11 +410,9 @@ class JtgsAppCore extends ReactComponent {
         rows: this.props.store.reqs.map((r, i) => ({ r, i })).filter((x) => x.r.kind === kind).map(({ r, i }) => ({
           cat: r.cat, id: r.id, name: r.name, detail: r.detail, pri: r.pri, memo: r.memo,
           hasMemo: !!r.memo, hasPri: !!r.pri,
+          selected: this.props.store.selRec.req === i,
           onClick: () => this.selectRec("req", i),
-          rowStyle: { cursor: "pointer", background: this.props.store.selRec.req === i ? "var(--fass-accent-soft)" : "transparent" },
           priStyle: ((pri) => ({
-            display: "inline-flex", alignItems: "center", height: "20px", padding: "0 8px",
-            borderRadius: "999px", fontSize: "13px", fontWeight: 800,
             background: pri === "필수" ? "var(--fass-danger-soft)" : pri === "중요" ? "var(--fass-warning-soft)" : "var(--fass-line-soft)",
             color: pri === "필수" ? "var(--fass-danger)" : pri === "중요" ? "var(--fass-warning)" : "var(--fass-muted)",
           }))(r.pri),
@@ -506,7 +443,7 @@ class JtgsAppCore extends ReactComponent {
       })) : [],
       modalLines: m && m.lines ? m.lines : [],
       modalConfirmLabel: m ? m.confirmLabel : "",
-      modalConfirmStyle: m ? this.actionStyle(m.danger ? "danger" : "primary") : null,
+      modalConfirmClass: m ? this.actionClass(m.danger ? "danger" : "primary").replace(" is-sm", "") : "fass-btn is-primary",
       closeModal: () => this.props.patchStore({ modal: null, draft: null }),
       submitModal: () => {
         if (m && m.kind === "rec") { this.saveRec(m.target); return; }
@@ -589,7 +526,7 @@ class JtgsAppCore extends ReactComponent {
         label: m.label, value: m.value, unit: m.unit, note: m.note,
         valueStyle: {
           fontSize: String(m.value).length > 8 ? "var(--font-size-lg)" : "var(--font-size-xl)",
-          fontWeight: 800, lineHeight: 1, fontVariantNumeric: "tabular-nums",
+          fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums",
           color: this.tone(m.tone),
         },
       })),
@@ -610,34 +547,34 @@ class JtgsAppCore extends ReactComponent {
       })),
       checkMetrics: CHECK_METRICS.map((m) => ({
         label: m.label, value: m.value, note: m.note,
-        valueStyle: { fontSize: "var(--font-size-xl)", fontWeight: 800, lineHeight: 1, color: this.tone(m.tone) },
+        valueStyle: { fontSize: "var(--font-size-xl)", fontWeight: 700, lineHeight: 1, color: this.tone(m.tone) },
       })),
       dashKpis: dash.kpis.map((k) => ({
         label: k.label, value: k.value, note: k.note,
-        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "30px", fontWeight: 800, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
+        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "30px", fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
         cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "14px 16px", background: "var(--fass-surface)", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(k.tone), borderRadius: "var(--fass-radius-lg)", boxShadow: "var(--shadow-sm)" },
       })),
       dashStations: dash.stations.map((s) => ({
         name: s.name, rows: s.rows,
         badgeStyle: this.badgeStyle(s.badgeTone), badge: s.badge,
-        cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "12px 14px", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(s.tone), borderRadius: "var(--fass-radius-md)" },
+        cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "16px 16px", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(s.tone), borderRadius: "var(--fass-radius-md)", background: "var(--fass-surface)", height: "100%" },
       })),
       dashTanks: dash.tanks.map((s) => ({
         station: s.station,
         state: s.fuels.some((f) => f.tone === "warning") ? "주의 · 안전재고 근접" : "정상",
         stateStyle: {
           display: "inline-flex", alignItems: "center", height: "18px", padding: "0 8px", borderRadius: "999px",
-          fontSize: "12px", fontWeight: 800,
+          fontSize: "12px", fontWeight: 600,
           background: s.fuels.some((f) => f.tone === "warning") ? "var(--fass-warning-soft)" : "var(--fass-success-soft)",
           color: s.fuels.some((f) => f.tone === "warning") ? "var(--fass-warning)" : "var(--fass-success)",
         },
         fuels: s.fuels.map((f) => ({
           label: f.label, pct: f.pct + "%",
           barStyle: { width: f.pct + "%", height: "100%", borderRadius: "999px", background: this.tone(f.tone) },
-          pctStyle: { fontSize: "var(--font-size-xs)", fontWeight: 800, color: this.tone(f.tone), fontVariantNumeric: "tabular-nums" },
+          pctStyle: { fontSize: "var(--font-size-xs)", fontWeight: 600, color: this.tone(f.tone), fontVariantNumeric: "tabular-nums" },
         })),
       })),
-      dashTankAlert: warnTanks > 0 ? ("FR-05-02 · 안전재고 임계 미만 탱크 " + warnTanks + "곳 — 담당자 확인 필요") : "",
+      dashTankAlert: warnTanks > 0 ? ("안전재고 임계 미만 탱크 " + warnTanks + "곳 — 담당자 확인이 필요합니다.") : "",
       dashIf: dash.ifRows,
       dashLog: dash.log.map((l) => ({
         text: l.text, meta: l.meta,
@@ -653,7 +590,7 @@ class JtgsAppCore extends ReactComponent {
         : view === "arch" ? "Vite 프론트 적용 · 백엔드/IAM은 목표(미연동)"
         : view === "req" ? "요구사항 정의 · 프론트 목업 반영분 표시"
         : "프론트 스택·요구사항 점검 결과"),
-      statusRight: (isGrid ? "화면 : JTGS" + t.code + " (통합)" : isDash ? "통합 대시보드" : view === "arch" ? "기술 스택 · 아키텍처" : view === "req" ? "요구사항 정의" : "소스 반영 점검") + " | 한성민 프로 / 정보전략팀 | 2026-07-27 16:04",
+      statusRight: "2026-07-27 16:04 기준 · " + (isGrid ? "JTGS" + t.code : isDash ? "통합 대시보드" : view === "arch" ? "기술 스택" : view === "req" ? "요구사항" : "소스 점검") + " · 한성민 프로",
     };
   }
 
