@@ -1,47 +1,41 @@
-import { Component as ReactComponent } from "react";
+import { Component as ReactComponent, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   B, HISTORY_COLS, HISTORY_ROWS, CHECK_GROUPS, CHECK_METRICS,
   FUEL_FILTERS, ACTIONS,
   GROUPS, CONFIRM_TEXT, MERGE_NOTE, DASH, LAYERS,
-  SEED_CODES, SEED_STACK, AREA_LIST, AREA_TONE, SEED_REQS, REC_SPEC,
+  AREA_LIST, AREA_TONE, REC_SPEC,
 } from "./data.js";
 import { Shell } from "./Shell.jsx";
+import { useJtgsStore } from "../store/jtgsStore.ts";
+import { fetchDashboard, fetchGridTick } from "../api/mockApi.ts";
+import { maskCard, validateRecDraft, filterRows } from "../lib/jtgsUtils.ts";
 
-export class JtgsApp extends ReactComponent {
-
-  state = {
-    view: "dash", seg: {}, tab: null, collapsed: false, sel: null, msg: "", modal: null,
-    codes: SEED_CODES.map((c) => Object.assign({}, c)),
-    stack: SEED_STACK.map((c) => Object.assign({}, c)),
-    reqs: SEED_REQS.map((c) => Object.assign({}, c)),
-    selRec: { stack: null, req: null },
-    draft: null,
-  };
-
-  storeOf(target) { return target === "code" ? this.state.codes : target === "stack" ? this.state.stack : this.state.reqs; }
-  indexOf(target) { return target === "code" ? this.state.sel : this.state.selRec[target]; }
+class JtgsAppCore extends ReactComponent {
+  storeOf(target) { return target === "code" ? this.props.store.codes : target === "stack" ? this.props.store.stack : this.props.store.reqs; }
+  indexOf(target) { return target === "code" ? this.props.store.sel : this.props.store.selRec[target]; }
 
   codeOpts(group, fallback) {
-    const list = this.state.codes.filter((c) => c.group === group && c.use === "사용").map((c) => c.name);
+    const list = this.props.store.codes.filter((c) => c.group === group && c.use === "사용").map((c) => c.name);
     return ["전체"].concat(list.length ? list : fallback);
   }
 
   selectRec(target, i) {
-    const cur = this.state.selRec[target];
-    this.setState({ selRec: Object.assign({}, this.state.selRec, { [target]: cur === i ? null : i }) });
+    const cur = this.props.store.selRec[target];
+    this.props.store.setSelRec(Object.assign({}, this.props.store.selRec, { [target]: cur === i ? null : i }));
   }
 
-  setDraft(k, v) { this.setState({ draft: Object.assign({}, this.state.draft, { [k]: v }) }); }
+  setDraft(k, v) { this.props.store.patchDraft(k, v); }
 
   codeRows() {
-    return this.state.codes.map((c, i) => [
+    return this.props.store.codes.map((c, i) => [
       String(i + 1), c.group, c.code, c.name, c.en, c.sort,
       c.use + (c.use === "사용" ? ":green" : ":gray"), c.updated, c.editor,
     ]);
   }
 
   codeMetrics() {
-    const cs = this.state.codes;
+    const cs = this.props.store.codes;
     const on = cs.filter((c) => c.use === "사용").length;
     const groups = new Set(cs.map((c) => c.group)).size;
     return [
@@ -55,7 +49,7 @@ export class JtgsApp extends ReactComponent {
   dynOptions(f) {
     if (f.kind !== "select") return f.options || [];
     const map = { "유종": "FUEL_TYPE", "제품": "FUEL_TYPE", "결제구분": "PAY_TYPE", "판매구분": "PAY_TYPE", "결제방법": "PAY_TYPE", "카드구분": "CARD_TYPE", "주유소": "STATION", "과세구분": "TAX_TYPE" };
-    if (f.label === "코드그룹") return ["전체"].concat(Array.from(new Set(this.state.codes.map((c) => c.group))));
+    if (f.label === "코드그룹") return ["전체"].concat(Array.from(new Set(this.props.store.codes.map((c) => c.group))));
     const g = map[f.label];
     return g ? this.codeOpts(g, (f.options || []).slice(1)) : (f.options || []);
   }
@@ -65,21 +59,21 @@ export class JtgsApp extends ReactComponent {
     const i = this.indexOf(target);
     const cur = (i === null || i === undefined) ? null : this.storeOf(target)[i];
     if (mode === "add") {
-      this.setState({
+      this.props.patchStore({
         modal: { kind: "rec", target, title: spec.noun + " 등록", sub: spec.sub, confirmLabel: "저장" },
         draft: Object.assign({ idx: null }, spec.blank),
       });
       return;
     }
-    if (!cur) { this.setState({ msg: spec.noun + "을(를) 목록에서 먼저 선택하세요." }); return; }
+    if (!cur) { this.props.patchStore({ msg: spec.noun + "을(를) 목록에서 먼저 선택하세요." }); return; }
     if (mode === "edit") {
-      this.setState({
+      this.props.patchStore({
         modal: { kind: "rec", target, title: spec.noun + " 수정", sub: spec.label(cur), confirmLabel: "저장" },
         draft: Object.assign({}, cur, { idx: i }),
       });
       return;
     }
-    this.setState({
+    this.props.patchStore({
       modal: {
         kind: "recDelete", target, title: spec.noun + " 삭제", sub: spec.label(cur),
         lines: ["선택한 " + spec.noun + "을(를) 삭제합니다.", spec.deleteNote],
@@ -90,10 +84,10 @@ export class JtgsApp extends ReactComponent {
 
   saveRec(target) {
     const spec = REC_SPEC[target];
-    const d = this.state.draft;
+    const d = this.props.store.draft;
     if (!d) return;
     const missing = spec.fields.filter((f) => f.required && !String(d[f.k] || "").trim());
-    if (missing.length) { this.setState({ msg: missing.map((f) => f.label).join(" · ") + " 은(는) 필수 입력입니다." }); return; }
+    if (missing.length) { this.props.patchStore({ msg: missing.map((f) => f.label).join(" · ") + " 은(는) 필수 입력입니다." }); return; }
     const list = this.storeOf(target).slice();
     const rec = spec.normalize(d, list);
     const isNew = d.idx === null || d.idx === undefined;
@@ -101,7 +95,7 @@ export class JtgsApp extends ReactComponent {
     const next = { modal: null, draft: null, msg: spec.noun + (isNew ? " 등록 완료 · " : " 수정 완료 · ") + spec.label(rec) + spec.savedNote };
     next[spec.store] = list;
     if (target === "code") next.sel = null;
-    this.setState(next);
+    this.props.patchStore(next);
   }
 
   deleteRec(target) {
@@ -113,8 +107,8 @@ export class JtgsApp extends ReactComponent {
     const next = { modal: null, msg: spec.noun + " 삭제 완료 · " + (gone ? spec.label(gone) : "") };
     next[spec.store] = list;
     if (target === "code") next.sel = null;
-    else next.selRec = Object.assign({}, this.state.selRec, { [target]: null });
-    this.setState(next);
+    else next.selRec = Object.assign({}, this.props.store.selRec, { [target]: null });
+    this.props.patchStore(next);
   }
 
   openModal(label, t, cols, view, segKey) {
@@ -123,23 +117,46 @@ export class JtgsApp extends ReactComponent {
       return;
     }
     if (label === "엑셀" || label === "인쇄" || label === "상세 보기") {
-      this.setState({ msg: label + " 요청 처리됨 · " + t.label });
+      this.props.patchStore({ msg: label + " 요청 처리됨 · " + t.label });
+      return;
+    }
+    // FR-06-02: force error tab context for retry
+    if (label === "오류 재처리" && view === "if") {
+      const errCount = (t.rows || []).filter((r) => r.some((c) => /:(red|warn)$/.test(String(c)))).length;
+      this.props.patchStore({
+        tab: "err",
+        modal: {
+          kind: "ifRetry",
+          title: "오류 재처리",
+          sub: t.label + " · JTGS" + t.code,
+          lines: [
+            "오류·주의 상태 " + errCount + "건을 다시 전송합니다.",
+            "재처리 대상은 '오류·차이 목록' 탭 기준입니다.",
+          ],
+          confirmLabel: "재처리 실행",
+          ifKey: view + ":" + segKey,
+          danger: false,
+        },
+      });
       return;
     }
     if (label === "등록" || label === "수정") {
       const fields = cols.filter((c) => c.label !== "No.").slice(0, 8).map((c) => ({
         label: c.label, placeholder: c.label + " 입력",
+        k: c.label, kind: /수량|단가|금액/.test(c.label) ? "text" : "text",
       }));
-      this.setState({
+      this.props.patchStore({
         modal: {
-          title: t.label + " " + label, sub: "JTGS" + t.code + " · 소스 ModalForm 규격",
+          kind: "form",
+          title: t.label + " " + label, sub: "JTGS" + t.code + " · 입력 검증 적용",
           fields, confirmLabel: "저장",
         },
+        draft: Object.fromEntries(fields.map((f) => [f.k, ""])),
       });
       return;
     }
     const lines = CONFIRM_TEXT[label] || ["선택한 작업을 실행합니다."];
-    this.setState({
+    this.props.patchStore({
       modal: {
         title: label, sub: t.label + " · JTGS" + t.code,
         lines, confirmLabel: label + " 실행",
@@ -221,13 +238,13 @@ export class JtgsApp extends ReactComponent {
 
   buildRows(raw, cols) {
     return raw.map((cells, i) => {
-      const selected = this.state.sel === i;
+      const selected = this.props.store.sel === i;
       return {
         style: {
           cursor: "pointer",
           background: selected ? "var(--fass-accent-soft)" : "transparent",
         },
-        onClick: () => this.setState({ sel: selected ? null : i }),
+        onClick: () => this.props.patchStore({ sel: selected ? null : i }),
         cells: cells.map((raw, ci) => {
           const align = (cols[ci].style.textAlign === "right") ? "r" : (cols[ci].style.textAlign === "center" ? "c" : "l");
           const parts = String(raw).split(":");
@@ -250,7 +267,7 @@ export class JtgsApp extends ReactComponent {
   }
 
   select(gk, k) {
-    this.setState({ view: gk, seg: Object.assign({}, this.state.seg, { [gk]: k }), tab: null, sel: null, msg: "" });
+    this.props.store.select(gk, k);
   }
 
   groupTabs(view, t) {
@@ -264,18 +281,18 @@ export class JtgsApp extends ReactComponent {
   }
 
   renderVals() {
-    const view = this.state.view;
+    const view = this.props.store.view;
     const G = GROUPS[view];
     const isGrid = !!G;
     const isDash = view === "dash";
     const keys = isGrid ? Object.keys(G.items) : [];
-    const segKey = isGrid ? (G.items[this.state.seg[view]] ? this.state.seg[view] : keys[0]) : null;
+    const segKey = isGrid ? (G.items[this.props.store.seg[view]] ? this.props.store.seg[view] : keys[0]) : null;
     const t = isGrid ? G.items[segKey] : null;
     const showCheck = this.props.showSourceCheck ?? true;
 
     const navRows = [
       { isGroup: true, label: "메인" },
-      { isItem: true, key: "dash", label: "대시보드", mark: "▸", onClick: () => this.setState({ view: "dash" }) },
+      { isItem: true, key: "dash", label: "대시보드", mark: "▸", onClick: () => this.props.store.setView("dash") },
     ];
     Object.keys(GROUPS).forEach((gk) => {
       navRows.push({ isGroup: true, label: GROUPS[gk].navLabel });
@@ -287,11 +304,11 @@ export class JtgsApp extends ReactComponent {
       });
     });
     navRows.push({ isGroup: true, label: "시스템 아키텍처" });
-    navRows.push({ isItem: true, key: "arch", label: "기술 스택", mark: "▸", onClick: () => this.setState({ view: "arch" }) });
-    navRows.push({ isItem: true, key: "req", label: "요구사항 정의", mark: "▸", onClick: () => this.setState({ view: "req" }) });
+    navRows.push({ isItem: true, key: "arch", label: "기술 스택", mark: "▸", onClick: () => this.props.store.setView("arch") });
+    navRows.push({ isItem: true, key: "req", label: "요구사항 정의", mark: "▸", onClick: () => this.props.store.setView("req") });
     if (showCheck) {
       navRows.push({ isGroup: true, label: "점검" });
-      navRows.push({ isItem: true, key: "check", label: "소스 반영 점검", mark: "▸", onClick: () => this.setState({ view: "check" }) });
+      navRows.push({ isItem: true, key: "check", label: "소스 반영 점검", mark: "▸", onClick: () => this.props.store.setView("check") });
     }
     navRows.forEach((r) => {
       if (!r.isItem) return;
@@ -331,7 +348,7 @@ export class JtgsApp extends ReactComponent {
     });
 
     const tabList = isGrid ? this.groupTabs(view, t) : [];
-    const curTab = isGrid ? (tabList.find((x) => x.key === this.state.tab) || tabList[0]) : null;
+    const curTab = isGrid ? (tabList.find((x) => x.key === this.props.store.tab) || tabList[0]) : null;
     const activeTab = curTab ? curTab.key : null;
     const tabDefs = tabList.map((x) => ({ key: x.key, label: x.label, count: x.rows.length }));
     const tabs = tabDefs.map((d) => {
@@ -350,13 +367,19 @@ export class JtgsApp extends ReactComponent {
           background: on ? "var(--fass-accent-soft)" : "var(--fass-line-soft)",
           color: on ? "var(--fass-accent-strong)" : "var(--fass-subtle)",
         },
-        onClick: () => this.setState({ tab: d.key, sel: null }),
+        onClick: () => this.props.patchStore({ tab: d.key, sel: null }),
       };
     });
 
     const cols = isGrid ? this.parseCols(curTab.cols) : [];
     const isCodeMaster = view === "master" && segKey === "code";
-    const rawRows = isGrid ? (isCodeMaster ? this.codeRows() : curTab.rows) : [];
+    const overrideKey = view + ":" + segKey;
+    const baseRaw = isGrid
+      ? (isCodeMaster
+        ? this.codeRows()
+        : (this.props.store.ifRowOverrides[overrideKey] || curTab.rows))
+      : [];
+    const rawRows = isGrid ? filterRows(baseRaw, cols, this.props.store.filterApplied || {}) : [];
     const rows = isGrid ? this.buildRows(rawRows, cols) : [];
     const footSrc = isGrid ? curTab.foot : null;
     const hasFoot = !!footSrc;
@@ -377,14 +400,16 @@ export class JtgsApp extends ReactComponent {
       label, style: this.actionStyle(variant),
       onClick: () => this.openModal(label, t, cols, view, segKey),
     })) : [];
-    const m = this.state.modal;
+    const m = this.props.store.modal;
 
-    return {
+    const dash = this.props.dashQuery?.data || DASH;
+      const warnTanks = dash.tanks.filter((s) => s.fuels.some((f) => f.tone === "warning")).length;
+      return {
       isGrid, isCheck: view === "check", isDash, actions,
       isArch: view === "arch", isReq: view === "req",
       stackAreas: AREA_LIST.map((area) => {
         const tone = AREA_TONE[area];
-        const rows = this.state.stack.map((r, i) => ({ r, i })).filter((x) => x.r.area === area);
+        const rows = this.props.store.stack.map((r, i) => ({ r, i })).filter((x) => x.r.area === area);
         return {
           area,
           headStyle: {
@@ -403,7 +428,7 @@ export class JtgsApp extends ReactComponent {
             rowStyle: {
               display: "grid", gridTemplateColumns: "minmax(120px,160px) minmax(0,1fr)", gap: "14px",
               padding: "12px 14px", borderBottom: "1px solid var(--fass-line-soft)", cursor: "pointer",
-              background: this.state.selRec.stack === i ? "var(--fass-accent-soft)" : "transparent",
+              background: this.props.store.selRec.stack === i ? "var(--fass-accent-soft)" : "transparent",
             },
             chips: r.items.split(",").map((n) => n.trim()).filter(Boolean).map((n) => ({
               name: n,
@@ -423,13 +448,13 @@ export class JtgsApp extends ReactComponent {
         { label: "수정", style: this.actionStyle("secondary"), onClick: () => this.openRec("stack", "edit") },
         { label: "삭제", style: this.actionStyle("danger"), onClick: () => this.openRec("stack", "delete") },
       ],
-      stackHint: this.state.selRec.stack === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.state.stack[this.state.selRec.stack].cat,
+      stackHint: this.props.store.selRec.stack === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.props.store.stack[this.props.store.selRec.stack].cat,
       reqActions: [
         { label: "요구사항 등록", style: this.actionStyle("primary"), onClick: () => this.openRec("req", "add") },
         { label: "수정", style: this.actionStyle("secondary"), onClick: () => this.openRec("req", "edit") },
         { label: "삭제", style: this.actionStyle("danger"), onClick: () => this.openRec("req", "delete") },
       ],
-      reqHint: this.state.selRec.req === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.state.reqs[this.state.selRec.req].id,
+      reqHint: this.props.store.selRec.req === null ? "행을 클릭해 선택한 뒤 수정·삭제할 수 있습니다." : "선택됨 · " + this.props.store.reqs[this.props.store.selRec.req].id,
       layers: LAYERS.map((l, i) => ({
         name: l.name, note: l.note, isLast: i === LAYERS.length - 1,
         barStyle: {
@@ -441,13 +466,13 @@ export class JtgsApp extends ReactComponent {
       })),
       reqTables: ["FR", "NFR"].map((kind) => ({
         title: kind === "FR" ? "기능 요구사항" : "비기능 요구사항",
-        note: kind + " · " + this.state.reqs.filter((r) => r.kind === kind).length + "건",
+        note: kind + " · " + this.props.store.reqs.filter((r) => r.kind === kind).length + "건",
         isFR: kind === "FR",
-        rows: this.state.reqs.map((r, i) => ({ r, i })).filter((x) => x.r.kind === kind).map(({ r, i }) => ({
+        rows: this.props.store.reqs.map((r, i) => ({ r, i })).filter((x) => x.r.kind === kind).map(({ r, i }) => ({
           cat: r.cat, id: r.id, name: r.name, detail: r.detail, pri: r.pri, memo: r.memo,
           hasMemo: !!r.memo, hasPri: !!r.pri,
           onClick: () => this.selectRec("req", i),
-          rowStyle: { cursor: "pointer", background: this.state.selRec.req === i ? "var(--fass-accent-soft)" : "transparent" },
+          rowStyle: { cursor: "pointer", background: this.props.store.selRec.req === i ? "var(--fass-accent-soft)" : "transparent" },
           priStyle: ((pri) => ({
             display: "inline-flex", alignItems: "center", height: "20px", padding: "0 8px",
             borderRadius: "999px", fontSize: "13px", fontWeight: 800,
@@ -461,15 +486,20 @@ export class JtgsApp extends ReactComponent {
       hasModal: !!m,
       modalTitle: m ? m.title : "",
       modalSub: m ? m.sub : "",
-      modalIsForm: !!(m && m.fields),
+      modalIsForm: !!(m && (m.fields || m.kind === "form")),
       modalIsRec: !!(m && m.kind === "rec"),
       modalIsConfirm: !!(m && m.lines),
-      modalFields: m && m.fields ? m.fields : [],
+      modalFields: m && (m.fields || m.kind === "form") ? (m.fields || []).map((f) => ({
+        label: f.label,
+        placeholder: f.placeholder || "",
+        value: (this.props.store.draft && this.props.store.draft[f.k || f.label] !== undefined) ? this.props.store.draft[f.k || f.label] : "",
+        onChange: (e) => this.props.store.patchDraft(f.k || f.label, e.target.value),
+      })) : [],
       modalRecFields: m && m.kind === "rec" ? REC_SPEC[m.target].fields.map((f) => ({
         label: f.label + (f.required ? " *" : ""),
         isSelect: f.kind === "select", isArea: f.kind === "area", isText: f.kind === "text",
         options: f.options || [],
-        value: (this.state.draft && this.state.draft[f.k] !== undefined) ? this.state.draft[f.k] : "",
+        value: (this.props.store.draft && this.props.store.draft[f.k] !== undefined) ? this.props.store.draft[f.k] : "",
         placeholder: f.ph || "",
         cellStyle: { display: "flex", flexDirection: "column", gap: "4px", gridColumn: f.wide ? "1 / -1" : "auto" },
         onChange: (e) => this.setDraft(f.k, e.target.value),
@@ -477,29 +507,84 @@ export class JtgsApp extends ReactComponent {
       modalLines: m && m.lines ? m.lines : [],
       modalConfirmLabel: m ? m.confirmLabel : "",
       modalConfirmStyle: m ? this.actionStyle(m.danger ? "danger" : "primary") : null,
-      closeModal: () => this.setState({ modal: null, draft: null }),
+      closeModal: () => this.props.patchStore({ modal: null, draft: null }),
       submitModal: () => {
         if (m && m.kind === "rec") { this.saveRec(m.target); return; }
         if (m && m.kind === "recDelete") { this.deleteRec(m.target); return; }
-        this.setState({ modal: null, msg: (m ? m.title : "") + " 처리 완료 · " + (t ? t.label : "") });
+        if (m && m.kind === "ifRetry") {
+          const key = m.ifKey;
+          const G0 = GROUPS.if;
+          const sk = key.split(":")[1];
+          const src = (G0.items[sk] && G0.items[sk].rows) || [];
+          const next = src.map((row) => row.map((c) => {
+            const s = String(c);
+            if (/:(red|warn)$/.test(s)) return s.replace(/:(red|warn)$/, ":green").replace(/^오류|^처리중|^차이발생|^검증대기/, "처리완료");
+            return c;
+          }));
+          // normalize badge text for known error statuses
+          const fixed = next.map((row) => row.map((c) => {
+            const s = String(c);
+            if (s.endsWith(":green") && /오류|처리중|차이발생|검증대기|미처리/.test(s.split(":")[0])) {
+              return "처리완료:green";
+            }
+            return c;
+          }));
+          this.props.store.setIfRowOverrides(key, fixed);
+          this.props.patchStore({ modal: null, msg: "오류 재처리 완료 · " + fixed.filter((r) => r.some((c) => String(c).includes("처리완료"))).length + "건 반영(목업)", tab: "all" });
+          this.props.queryClient?.invalidateQueries?.({ queryKey: ["grid"] });
+          return;
+        }
+        if (m && m.kind === "form") {
+          const fields = (m.fields || []).map((f) => ({
+            k: f.k || f.label, label: f.label, required: true, kind: f.kind,
+          }));
+          const verr = validateRecDraft(fields, this.props.store.draft);
+          if (verr) { this.props.patchStore({ msg: verr }); return; }
+          this.props.patchStore({ modal: null, draft: null, msg: (m.title || "저장") + " 완료 · 검증 통과(목업)" });
+          return;
+        }
+        this.props.patchStore({ modal: null, msg: (m ? m.title : "") + " 처리 완료 · " + (t ? t.label : "") });
       },
       navRows, segments, tabs, cols, rows, foot, hasFoot,
       headTitle: isGrid ? t.title : (isDash ? "통합 대시보드" : view === "arch" ? "기술 스택 · 아키텍처" : view === "req" ? "요구사항 정의" : "소스 반영 점검"),
-      headSub: isGrid ? t.sub : (isDash ? "· 전체 주유소 운영 현황" : view === "arch" ? "· 요구사항 정의서 기준 FaSS 연계 오픈소스 스택" : view === "req" ? "· 기능(FR) 15건 · 비기능(NFR) 10건" : "· 첨부된 차세대 소스(FASS) 대비 반영 현황"),
+      headSub: isGrid ? t.sub : (isDash ? "· 전체 주유소 운영 현황" : view === "arch" ? "· Vite·React 적용 스택 · 백엔드는 목표(미연동)" : view === "req" ? "· 기능(FR) · 비기능(NFR) · 프론트 목업 반영" : "· Vite 프론트 스택 대비 점검 결과"),
       summary: isGrid ? t.summary : "",
-      expanded: !this.state.collapsed,
-      collapseLabel: this.state.collapsed ? "펼치기" : "접기",
-      toggleCollapse: () => this.setState({ collapsed: !this.state.collapsed }),
-      doSearch: () => this.setState({ msg: "조회 완료 · " + t.label + " " + rawRows.length + "건 표시" }),
+      expanded: !this.props.store.collapsed,
+      collapseLabel: this.props.store.collapsed ? "펼치기" : "접기",
+      toggleCollapse: () => this.props.store.toggleCollapse(),
+      doSearch: () => {
+        this.props.store.applyFilters();
+        this.props.queryClient?.invalidateQueries?.({ queryKey: ["grid", view] });
+        const n = filterRows(baseRaw, cols, { ...this.props.store.filterDraft }).length;
+        this.props.patchStore({ msg: "조회 완료 · " + t.label + " " + n + "건 표시" });
+      },
+      doResetFilters: () => {
+        const defs = {};
+        (isGrid ? (view === "fuel" ? FUEL_FILTERS : t.filters) : []).forEach((f) => {
+          defs[f.label] = f.kind === "select" ? "전체" : (f.value || "");
+        });
+        this.props.store.resetFilters(defs);
+        this.props.patchStore({ msg: "조회 조건 초기화" });
+      },
       filters: (isGrid ? (view === "fuel" ? FUEL_FILTERS : t.filters) : []).map((f) => ({
         label: f.label,
         isSelect: f.kind === "select",
         isInput: f.kind !== "select",
         type: f.kind === "text" ? "text" : f.kind,
-        value: f.value || "",
+        value: this.props.store.filterDraft[f.label] ?? f.value ?? (f.kind === "select" ? "전체" : ""),
         placeholder: f.placeholder || "",
         options: this.dynOptions(f),
+        onChange: (e) => this.props.store.setFilterDraft(f.label, e.target.value),
       })),
+      loading: !!(this.props.dashQuery?.isFetching || this.props.gridQuery?.isFetching),
+      sidebarOpen: this.props.store.sidebarOpen,
+      toggleSidebar: () => this.props.store.toggleSidebar(),
+      closeSidebar: () => this.props.store.setSidebarOpen(false),
+      refreshAll: () => {
+        this.props.queryClient?.invalidateQueries?.({ queryKey: ["dashboard"] });
+        this.props.queryClient?.invalidateQueries?.({ queryKey: ["grid"] });
+        this.props.patchStore({ msg: "데이터 새로고침 요청(Query invalidate)" });
+      },
       metrics: (isGrid ? (isCodeMaster ? this.codeMetrics() : t.metrics) : []).map((m) => ({
         label: m.label, value: m.value, unit: m.unit, note: m.note,
         valueStyle: {
@@ -527,19 +612,19 @@ export class JtgsApp extends ReactComponent {
         label: m.label, value: m.value, note: m.note,
         valueStyle: { fontSize: "var(--font-size-xl)", fontWeight: 800, lineHeight: 1, color: this.tone(m.tone) },
       })),
-      dashKpis: DASH.kpis.map((k) => ({
+      dashKpis: dash.kpis.map((k) => ({
         label: k.label, value: k.value, note: k.note,
         valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "30px", fontWeight: 800, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
         cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "14px 16px", background: "var(--fass-surface)", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(k.tone), borderRadius: "var(--fass-radius-lg)", boxShadow: "var(--shadow-sm)" },
       })),
-      dashStations: DASH.stations.map((s) => ({
+      dashStations: dash.stations.map((s) => ({
         name: s.name, rows: s.rows,
         badgeStyle: this.badgeStyle(s.badgeTone), badge: s.badge,
         cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "12px 14px", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(s.tone), borderRadius: "var(--fass-radius-md)" },
       })),
-      dashTanks: DASH.tanks.map((s) => ({
+      dashTanks: dash.tanks.map((s) => ({
         station: s.station,
-        state: s.fuels.some((f) => f.tone === "warning") ? "주의" : "정상",
+        state: s.fuels.some((f) => f.tone === "warning") ? "주의 · 안전재고 근접" : "정상",
         stateStyle: {
           display: "inline-flex", alignItems: "center", height: "18px", padding: "0 8px", borderRadius: "999px",
           fontSize: "12px", fontWeight: 800,
@@ -552,21 +637,22 @@ export class JtgsApp extends ReactComponent {
           pctStyle: { fontSize: "var(--font-size-xs)", fontWeight: 800, color: this.tone(f.tone), fontVariantNumeric: "tabular-nums" },
         })),
       })),
-      dashIf: DASH.ifRows,
-      dashLog: DASH.log.map((l) => ({
+      dashTankAlert: warnTanks > 0 ? ("FR-05-02 · 안전재고 임계 미만 탱크 " + warnTanks + "곳 — 담당자 확인 필요") : "",
+      dashIf: dash.ifRows,
+      dashLog: dash.log.map((l) => ({
         text: l.text, meta: l.meta,
         dotStyle: { width: "9px", height: "9px", borderRadius: "50%", flexShrink: 0, marginTop: "5px", background: this.tone(l.tone) },
       })),
-      dashJump: DASH.jump.map((j) => ({
+      dashJump: dash.jump.map((j) => ({
         label: j.label, note: j.note,
         onClick: () => this.select(j.view, j.key),
       })),
-      statusLeft: this.state.msg || (isGrid
-        ? "[2026-07-27 16:04] " + t.label + " " + t.metrics[0].value + t.metrics[0].unit + " 조회 완료"
-        : isDash ? "시스템 정상 운영 중 · DB 응답 12ms"
-        : view === "arch" ? "요구사항 정의서 260720 · FaSS 연계 기술 스택 8개 영역"
-        : view === "req" ? "요구사항 정의서 260720 · FR 15건 / NFR 10건"
-        : "첨부 소스 32개 컴포넌트 대비 점검 결과"),
+      statusLeft: this.props.store.msg || (isGrid
+        ? "[2026-07-27 16:04] " + t.label + " " + rawRows.length + "건 조회"
+        : isDash ? (this.props.dashQuery?.isFetching ? "대시보드 로딩 중…" : ("시스템 정상 · 재고주의 " + warnTanks + "곳 · Query cache"))
+        : view === "arch" ? "Vite 프론트 적용 · 백엔드/IAM은 목표(미연동)"
+        : view === "req" ? "요구사항 정의 · 프론트 목업 반영분 표시"
+        : "프론트 스택·요구사항 점검 결과"),
       statusRight: (isGrid ? "화면 : JTGS" + t.code + " (통합)" : isDash ? "통합 대시보드" : view === "arch" ? "기술 스택 · 아키텍처" : view === "req" ? "요구사항 정의" : "소스 반영 점검") + " | 한성민 프로 / 정보전략팀 | 2026-07-27 16:04",
     };
   }
@@ -576,4 +662,44 @@ export class JtgsApp extends ReactComponent {
     const v = this.renderVals();
     return <Shell v={v} />;
   }
+}
+
+export function JtgsApp() {
+  const store = useJtgsStore();
+  const queryClient = useQueryClient();
+  const dashQuery = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboard,
+  });
+  const gridQuery = useQuery({
+    queryKey: ["grid", store.view, store.seg[store.view], store.tab],
+    queryFn: () => fetchGridTick(store.view + ":" + (store.seg[store.view] || "")),
+    enabled: !!GROUPS[store.view],
+  });
+
+  useEffect(() => {
+    const G = GROUPS[store.view];
+    if (!G) return;
+    const keys = Object.keys(G.items);
+    const segKey = G.items[store.seg[store.view]] ? store.seg[store.view] : keys[0];
+    const t = G.items[segKey];
+    const filters = store.view === "fuel" ? FUEL_FILTERS : (t?.filters || []);
+    const defs = {};
+    filters.forEach((f) => {
+      defs[f.label] = f.kind === "select" ? (f.options?.[0] || "전체") : (f.value || "");
+    });
+    useJtgsStore.getState().resetFilters(defs);
+  }, [store.view, store.seg[store.view]]);
+
+  const patchStore = (partial) => useJtgsStore.setState(partial);
+
+  return (
+    <JtgsAppCore
+      store={store}
+      patchStore={patchStore}
+      dashQuery={dashQuery}
+      gridQuery={gridQuery}
+      queryClient={queryClient}
+    />
+  );
 }

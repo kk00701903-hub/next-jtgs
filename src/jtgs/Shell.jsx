@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 function sx(css) {
   if (!css || typeof css !== "string") return css || undefined;
@@ -16,26 +16,51 @@ function sx(css) {
 }
 
 export function Shell({ v }) {
+  const navScrollTimer = useRef(null);
+  const onSidebarScroll = (e) => {
+    const el = e.currentTarget;
+    el.classList.add("is-scrolling");
+    clearTimeout(navScrollTimer.current);
+    navScrollTimer.current = setTimeout(() => {
+      el.classList.remove("is-scrolling");
+    }, 700);
+  };
+
   const {
     navRows, segments, tabs, cols, rows, foot, hasFoot,
-    headTitle, headSub, summary, expanded, collapseLabel, toggleCollapse, doSearch,
+    headTitle, headSub, summary, expanded, collapseLabel, toggleCollapse, doSearch, doResetFilters,
     filters, metrics, gridTitle, gridCount, mergeNote, actions,
     segLabel, segNote,
     isGrid, isDash, isArch, isReq, isCheck,
     checkGroups, checkMetrics,
-    dashKpis, dashStations, dashTanks, dashIf, dashLog, dashJump,
+    dashKpis, dashStations, dashTanks, dashIf, dashLog, dashJump, dashTankAlert,
     statusLeft, statusRight,
     hasModal, modalTitle, modalSub, closeModal, submitModal,
     modalIsForm, modalIsRec, modalIsConfirm, modalFields, modalRecFields, modalLines,
     modalConfirmStyle, modalConfirmLabel,
     stackHint, stackActions, stackAreas, layers,
     reqHint, reqActions, reqTables,
+    loading, sidebarOpen, toggleSidebar, closeSidebar, refreshAll,
   } = v;
 
   return (
-    <div style={sx(`display:flex;height:100vh;overflow:hidden;background:var(--fass-bg)`)}>
-    
-      <nav style={sx(`width:224px;flex-shrink:0;background:var(--fass-navy);color:#fff;display:flex;flex-direction:column;box-shadow:2px 0 8px rgba(0,0,0,.15)`)}>
+    <div className="flex h-screen overflow-hidden bg-[var(--fass-bg)] relative">
+      {sidebarOpen ? (
+        <button
+          type="button"
+          aria-label="사이드바 닫기"
+          className="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
+          onClick={closeSidebar}
+        />
+      ) : null}
+
+      <nav
+        className={[
+          "fixed md:static z-50 md:z-auto inset-y-0 left-0 w-56 shrink-0 bg-[var(--fass-navy)] text-white flex flex-col shadow-[2px_0_8px_rgba(0,0,0,.15)]",
+          "transition-transform duration-200 md:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        ].join(" ")}
+      >
         <div style={sx(`display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1)`)}>
           <div style={sx(`width:32px;height:32px;flex-shrink:0;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;letter-spacing:-.02em`)}>JT</div>
           <div style={sx(`display:flex;flex-direction:column;gap:1px`)}>
@@ -44,7 +69,7 @@ export function Shell({ v }) {
           </div>
         </div>
     
-        <div className="fass-scroll" style={sx(`flex:1;overflow-y:auto;padding:8px 0`)}>
+        <div className="fass-scroll sidebar-scroll" onScroll={onSidebarScroll} style={sx(`flex:1;overflow-y:auto;padding:8px 0`)}>
           {(navRows || []).map((row, row__i) => (
     <React.Fragment key={row__i}>
     {row.isGroup ? (
@@ -72,11 +97,19 @@ export function Shell({ v }) {
       <div style={sx(`flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden`)}>
     
         <div style={sx(`height:56px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--fass-surface);border-bottom:1px solid var(--fass-line);box-shadow:var(--shadow-sm)`)}>
+          <button
+            type="button"
+            className="md:hidden h-8 px-3 rounded-md border border-[var(--fass-line-strong)] bg-[var(--fass-surface)] text-[var(--fass-text)] text-sm font-extrabold"
+            onClick={toggleSidebar}
+          >
+            메뉴
+          </button>
           <strong style={sx(`font-size:17px;font-weight:900;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0`)}>{headTitle}</strong>
           <span style={sx(`font-size:var(--font-size-sm);color:var(--fass-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`)}>{headSub}</span>
           <div style={sx(`flex:1`)}></div>
-          <span style={sx(`font-size:var(--font-size-xs);font-weight:700;color:var(--fass-muted);background:var(--fass-bg);border:1px solid var(--fass-line);border-radius:var(--fass-radius-md);padding:5px 10px;white-space:nowrap;flex-shrink:0`)}>2026-07-27 (월) 16:04 기준</span>
-          <button style={sx(`height:var(--fass-button-height-sm);padding:0 var(--fass-button-padding-x-sm);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid var(--fass-line-strong);background:var(--fass-surface);color:var(--fass-text);cursor:pointer;white-space:nowrap;flex-shrink:0`)}>새로고침</button>
+          {loading ? <span className="text-xs font-bold text-[var(--fass-accent)]">로딩…</span> : null}
+          <span className="hidden sm:inline-flex" style={sx(`font-size:var(--font-size-xs);font-weight:700;color:var(--fass-muted);background:var(--fass-bg);border:1px solid var(--fass-line);border-radius:var(--fass-radius-md);padding:5px 10px;white-space:nowrap;flex-shrink:0`)}>2026-07-27 (월) 16:04 기준</span>
+          <button type="button" onClick={refreshAll} style={sx(`height:var(--fass-button-height-sm);padding:0 var(--fass-button-padding-x-sm);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid var(--fass-line-strong);background:var(--fass-surface);color:var(--fass-text);cursor:pointer;white-space:nowrap;flex-shrink:0`)}>새로고침</button>
         </div>
     
         <div className="fass-scroll" style={sx(`flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px`)}>
@@ -107,21 +140,21 @@ export function Shell({ v }) {
     <div key={f__i} style={sx(`display:flex;flex-direction:column;gap:4px`)}>
                           <label style={sx(`font-size:var(--font-size-xs);font-weight:800;color:var(--fass-muted)`)}>{f.label}</label>
                           {f.isSelect ? (
-    <><select style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md);cursor:pointer`)}>
+    <><select value={f.value} onChange={f.onChange} style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md);cursor:pointer`)}>
                               {(f.options || []).map((opt, opt__i) => (
-    <option key={opt__i}>{opt}</option>
+    <option key={opt__i} value={opt}>{opt}</option>
     ))}
                             </select></>
     ) : null}
                           {f.isInput ? (
-    <><input type={f.type} defaultValue={f.value} placeholder={f.placeholder} style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md)`)} /></>
+    <><input type={f.type} value={f.value} onChange={f.onChange} placeholder={f.placeholder} style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md)`)} /></>
     ) : null}
                         </div>
     ))}
                     </div>
                     <div style={sx(`display:flex;align-items:center;justify-content:flex-end;gap:6px`)}>
-                      <button style={sx(`height:var(--fass-button-height-md);padding:0 var(--fass-button-padding-x-md);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid transparent;background:transparent;color:var(--fass-muted);cursor:pointer`)}>초기화</button>
-                      <button onClick={doSearch} style={sx(`height:var(--fass-button-height-md);padding:0 var(--fass-button-padding-x-md);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid var(--fass-accent);background:var(--fass-accent);color:#fff;cursor:pointer;box-shadow:0 8px 18px color-mix(in srgb,var(--fass-accent) 22%,transparent)`)}>조회</button>
+                      <button type="button" onClick={doResetFilters} style={sx(`height:var(--fass-button-height-md);padding:0 var(--fass-button-padding-x-md);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid transparent;background:transparent;color:var(--fass-muted);cursor:pointer`)}>초기화</button>
+                      <button type="button" onClick={doSearch} style={sx(`height:var(--fass-button-height-md);padding:0 var(--fass-button-padding-x-md);font-size:var(--fass-button-font-size);font-weight:850;border-radius:var(--fass-button-radius);border:1px solid var(--fass-accent);background:var(--fass-accent);color:#fff;cursor:pointer;box-shadow:0 8px 18px color-mix(in srgb,var(--fass-accent) 22%,transparent)`)}>조회</button>
                     </div>
                   </div></>
     ) : null}
@@ -204,6 +237,12 @@ export function Shell({ v }) {
     
           {isDash ? (
     <><div style={sx(`display:flex;flex-direction:column;gap:12px`)}>
+              {loading ? <div className="skel h-16 w-full" /> : null}
+              {dashTankAlert ? (
+                <div className="rounded-[var(--fass-radius-lg)] border border-[var(--fass-warning)] bg-[var(--fass-warning-soft)] px-3.5 py-2.5 text-[13px] font-extrabold text-[var(--fass-warning)]">
+                  {dashTankAlert}
+                </div>
+              ) : null}
               <div style={sx(`display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px`)}>
                 {(dashKpis || []).map((k, k__i) => (
     <div key={k__i} style={k.cardStyle}>
@@ -519,7 +558,7 @@ export function Shell({ v }) {
                   {(modalFields || []).map((f, f__i) => (
     <div key={f__i} style={sx(`display:flex;flex-direction:column;gap:4px`)}>
                       <label style={sx(`font-size:var(--font-size-xs);font-weight:800;color:var(--fass-muted)`)}>{f.label}</label>
-                      <input placeholder={f.placeholder} style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md)`)} />
+                      <input value={f.value ?? ""} onChange={f.onChange} placeholder={f.placeholder} style={sx(`height:var(--fass-button-height-md);padding:0 8px;font-size:var(--font-size-sm);font-weight:600;color:var(--fass-text);background:var(--fass-surface);border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md)`)} />
                     </div>
     ))}
                 </div></>

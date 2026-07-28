@@ -63,7 +63,7 @@ export const TYPES = {
     rows: [
       ["1", "07-27 08:12", "김해점", "POS-01", "R26072700118", "경유", "62.4", "1,684", "105,082", "현금", "처리완료:green", "-"],
       ["2", "07-27 09:03", "배양점", "POS-02", "R26072700231", "휘발유", "38.0", "1,742", "66,196", "현금", "처리완료:green", "-"],
-      ["3", "07-27 10:41", "논산점", "POS-01", "R26072700377", "LPG", "45.2", "1,092", "49,358", "현금", "오류:red", "POS 마감 미완료"],
+      ["3", "07-27 10:41", "논산점", "POS-01", "R26072700377", "휘발유", "45.2", "1,742", "78,738", "현금", "오류:red", "POS 마감 미완료"],
       ["4", "07-27 11:26", "김해점", "POS-03", "R26072700482", "경유", "80.0", "1,684", "134,720", "현금영수증", "처리완료:green", "-"],
       ["5", "07-27 13:08", "배양점", "POS-01", "R26072700615", "경유", "55.6", "1,690", "93,964", "현금", "미처리:gray", "-"],
       ["6", "07-27 14:32", "논산점", "POS-02", "R26072700744", "휘발유", "41.8", "1,748", "73,066", "현금", "오류:red", "단가 마스터 불일치"],
@@ -148,67 +148,59 @@ export const HISTORY_ROWS = [
 
 export const CHECK_GROUPS = [
   {
-    title: "Atoms (12/12 확인)", note: "fass-button · badge · input · select · label 외",
+    title: "프론트 스택 · 배포", note: "Vite · Pages · PWA",
     items: [
-      { name: "fass-button.tsx", status: "반영", note: "primary/secondary/ghost/danger 4종을 툴바·조회 버튼에 매핑. size sm(28px)·md(32px), font-weight 850, radius 6px, primary shadow(accent 22%)까지 소스와 동일." },
-      { name: "fass-badge.tsx", status: "반영", note: "IF상태·검증상태 배지에 soft 배경 + strong 텍스트, height 20px, radius 999px, font-size 11px 적용." },
-      { name: "fass-input.tsx / select", status: "반영", note: "조회 조건 필드 높이 32px, border --fass-line-strong, radius --fass-radius-md 통일." },
-      { name: "fass-label.tsx", status: "반영", note: "필드 라벨 11px / weight 800 / muted 색으로 통일." },
-      { name: "fass-checkbox · radio-group · switch · toggle", status: "미사용", note: "이 화면에는 다중선택·토글 조건이 없어 미사용. 원본 010170 TAB2의 헤더 체크박스는 통합 화면에서 행 클릭 선택으로 대체." },
-      { name: "fass-avatar · divider · progress · skeleton · spinner · tooltip", status: "미사용", note: "사이드바 사용자 아바타만 동일 규격(30px/원형)으로 반영, 나머지는 로딩·안내 상태용으로 이 화면 범위 외." },
+      { name: "Vite + React 19", status: "반영", note: "GitHub Pages CSR(/next-jtgs/). Next.js/SSR은 목표 아키텍처로 문서에만 표기." },
+      { name: "Tailwind CSS + --fass-*", status: "반영", note: "유틸리티 반응형 + FaSS 디자인 토큰 병행." },
+      { name: "Zustand · TanStack Query", status: "반영", note: "UI/마스터 전역 상태와 목업 async 조회·캐시·invalidate(조회 버튼)." },
+      { name: "vite-plugin-pwa", status: "반영", note: "설치 가능한 PWA 매니페스트·오프라인 셸 캐시(FR-02-02)." },
+      { name: "Spring · Keycloak · Kafka", status: "미반영", note: "백엔드·IAM·메시징은 목표·미연동. 프론트 목업만 제공." },
+      { name: "Apache Superset BI", status: "미반영", note: "FR-03-02 목표. 대시보드는 목업 KPI·차트로 대체." },
     ],
   },
   {
-    title: "Molecules (10개 중 5개 사용)", note: "form-field · date-field · number-input · metric-pill 외",
+    title: "Atoms (UI 규격)", note: "button · badge · input · select · label",
     items: [
-      { name: "fass-form-field.tsx", status: "반영", note: "vertical 방향(라벨-컨트롤 gap 4px) 구조로 조회 조건 5개 필드 구성." },
-      { name: "fass-date-field.tsx", status: "반영", note: "처리월(month)·처리일(date) 입력으로 사용. IF 주기(월/일)에 따라 타입이 바뀌도록 통합." },
-      { name: "fass-metric-pill.tsx", status: "반영", note: "요약 카드 = MetricPill md 규격(px 16/py 12, label xs muted, value tabular-nums, variant success/warning/danger/default)." },
-      { name: "fass-page-title.tsx", status: "부분", note: "헤더에 제목+보조설명은 반영했으나 소스의 breadcrumb 슬롯은 통합 화면에서 세그먼트 전환으로 대체." },
-      { name: "fass-search-bar.tsx", status: "부분", note: "거래처명 검색을 일반 input으로 처리 — 소스의 아이콘·클리어 버튼 미적용." },
-      { name: "fass-button-group · file-upload · lookup-input · number-input", status: "미사용", note: "IF 조회 화면에는 파일 업로드·코드 팝업 조회·수치 직접입력이 없음. 세그먼트 전환은 ButtonGroup 대신 pill 형태로 구현." },
+      { name: "fass-button / badge / input", status: "반영", note: "툴바·조회·배지·필터 컨트롤에 --fass-* 높이·색·radius 적용." },
+      { name: "fass-label", status: "반영", note: "필드 라벨 xs / weight 800 / muted." },
+      { name: "skeleton · spinner", status: "부분", note: "TanStack Query 로딩 시 대시보드·그리드 스켈레톤 표시." },
     ],
   },
   {
-    title: "Organisms (6개 중 4개 사용)", note: "search-panel · grid-toolbar · tab-panel · detail-panel",
+    title: "요구사항 프론트 적용", note: "FR/NFR 목업",
     items: [
-      { name: "fass-search-panel.tsx", status: "반영", note: "헤더 42px + 제목 '조회 조건' + 접힘 시 summary 표시 + 접기/펼치기 pill 버튼 + auto-fit minmax(170px) 필드 그리드 + 우측 초기화(ghost)/조회(primary) — 소스 구조 그대로." },
-      { name: "fass-grid-toolbar.tsx", status: "반영", note: "높이 42px, border-bottom 없음, rounded-t, 좌측 제목 / 우측 버튼 정렬 규칙 준수. 등록·수정·삭제 대신 IF 전송(primary)·검증(secondary)·오류 재처리(secondary)·엑셀(ghost)로 슬롯 대체." },
-      { name: "fass-tab-panel.tsx", status: "부분", note: "line 탭 트리거(활성 하단 2px accent) 규격 반영 — IF 3탭, 유류 실적 4탭(POS·정유사·VAN·기타)이 같은 그리드에서 컬럼셋만 교체. 소스의 저장/취소 액션은 조회 중심 화면이라 미표시." },
-      { name: "fass-confirm-dialog.tsx", status: "반영", note: "IF 전송·검증·오류 재처리·삭제·마감 실행/취소·재고 조정 등 되돌릴 수 없는 액션은 확인 다이얼로그를 경유. 위험 액션은 확인 버튼이 danger variant." },
-      { name: "fass-modal-form.tsx", status: "반영", note: "등록·수정 액션이 모달 폼(auto-fit minmax(200px) 필드 그리드 + 취소/저장 푸터)으로 열리며 컬럼 정의에서 필드를 생성 — 원본 팝업 화면(010040/050/060 popup, 010041, 010061, 010130/131 popup)을 대체." },
-      { name: "fass-detail-panel.tsx", status: "부분", note: "행 클릭 시 선택 하이라이트까지 반영. 원본 010111-statement-popup은 외상 실적 TAB4(거래명세서)로 흡수했고, 우측 상세 패널 펼침은 후속 작업." },
+      { name: "FR-01 코드·지점 동적 필터", status: "반영", note: "코드 마스터 CRUD → 조회 옵션·행 필터 즉시 반영." },
+      { name: "FR-02 PWA·입력 검증", status: "반영", note: "반응형 드로어 + 모달 수량/단가 이상치 검증." },
+      { name: "NFR-02 카드 마스킹", status: "반영", note: "카드번호 컬럼 maskCard() 표시." },
+      { name: "FR-05/06 재고·IF 재처리", status: "반영", note: "대시보드 임계 알림 + IF 오류 재처리 목업." },
+      { name: "Keycloak RBAC · Kafka IF", status: "미반영", note: "실연동 범위 밖(목표)." },
     ],
   },
   {
-    title: "토큰·컨벤션 점검", note: "기존 변환 HTML과 소스의 차이",
+    title: "토큰·컨벤션", note: "룩앤필",
     items: [
-      { name: "화면 통합 범위", status: "반영", note: "원본 88개 HTML(탭·팝업 포함)을 통합 대시보드 + 6개 통합 그리드 화면(IF·유류 실적·기준정보·매출·정산·재고·마감) + 공용 모달로 축약. 골격(사이드바·헤더·조회조건·요약·툴바·탭·그리드·상태바)은 1세트만 유지." },
-      { name: "액션 버튼 슬롯", status: "반영", note: "GridToolbar 기본 액션을 화면 성격에 맞게 매핑 — 유류 실적: 등록(primary)·수정(secondary)·삭제(danger)·엑셀(ghost) 원본 그대로, IF: IF 전송·검증·오류 재처리·엑셀로 치환." },
-      { name: "--fass-* 토큰", status: "반영", note: "기존 변환 HTML은 --navy/--accent 등 자체 변수만 사용해 소스와 이름이 달랐음. 이 화면에서 소스가 참조하는 --fass-* / --font-size-* / --shadow-* 토큰 이름 체계로 재정의." },
-      { name: "아이콘 규칙", status: "미반영", note: "소스는 lucide-react(14px, stroke 2)를 사용하지만 기존 변환 HTML은 이모지(🔍 📤 ✅ 📊)를 사용. 통합 화면은 이모지를 제거했고, lucide SVG 삽입은 후속 작업." },
-      { name: "버튼 정렬 규칙", status: "수정", note: "기존 화면은 툴바 버튼이 좌측 정렬이었으나 소스 GridToolbar는 ml-auto 우측 정렬 — 소스 기준으로 바로잡음." },
-      { name: "조회 조건 접힘", status: "수정", note: "기존 화면의 검색 영역은 항상 펼쳐진 상태였음. 소스 SearchPanel의 collapsed + summary 동작을 추가." },
-      { name: "font-weight", status: "수정", note: "소스는 버튼 850 / 제목 black(900) 사용. 기존 변환 HTML의 500~700을 소스 기준으로 상향." },
+      { name: "--fass-* 토큰", status: "반영", note: "컬러·타이포·버튼·배지 토큰 유지, Tailwind theme 연결." },
+      { name: "조회 조건 접힘", status: "반영", note: "SearchPanel collapsed + summary." },
+      { name: "모바일 사이드바", status: "반영", note: "md 미만 드로어 + 헤더 토글." },
     ],
   },
 ];
 
 export const CHECK_METRICS = [
-  { label: "첨부 소스 컴포넌트", value: "32개", note: "atoms 12 · molecules 10 · organisms 6 · 기타" },
-  { label: "이 화면에 반영", value: "15개", tone: "success", note: "구조·토큰까지 동일 적용" },
-  { label: "부분 반영", value: "4개", tone: "warning", note: "PageTitle · SearchBar · TabPanel · DetailPanel" },
-  { label: "미사용(범위 외)", value: "13개", note: "토글·업로드·로딩 표시 등" },
+  { label: "프론트 스택 항목", value: "적용", note: "Vite · Tailwind · Zustand · Query · PWA" },
+  { label: "FR 목업 반영", value: "6+", tone: "success", note: "코드필터·검증·마스킹·IF·재고·반응형" },
+  { label: "백엔드 목표", value: "미연동", tone: "warning", note: "Spring · Keycloak · Kafka 등" },
+  { label: "배포", value: "Pages", note: "https://kk00701903-hub.github.io/next-jtgs/" },
 ];
 
 export const fmt = (n) => Math.round(n).toLocaleString("ko-KR");
-export const PRICE = { "경유": 1684, "휘발유": 1742, "LPG": 1092 };
+export const PRICE = { "경유": 1684, "휘발유": 1742 };
 
 export function fuelTabs(k) {
   const posBase = [
     ["08:12", "K-1001", "개인", "1번", "경유", 62.4, "카드", "신용", "신한카드", "과세"],
     ["09:03", "K-1042", "(주)제때", "2번", "휘발유", 38.0, "외상", "외상", "-", "과세"],
-    ["10:41", "K-1108", "개인", "3번", "LPG", 45.2, "현금", "현금", "-", "과세"],
+    ["10:41", "K-1108", "개인", "3번", "휘발유", 45.2, "현금", "현금", "-", "과세"],
     ["11:26", "K-1155", "서울운수(주)", "1번", "경유", 80.0, "카드", "체크", "KB국민", "면세"],
     ["13:08", "K-1201", "개인", "4번", "경유", 55.6, "현금", "현금영수증", "-", "과세"],
     ["14:32", "K-1263", "대한물류", "2번", "휘발유", 41.8, "카드", "신용", "삼성카드", "과세"],
@@ -227,7 +219,7 @@ export function fuelTabs(k) {
     ["S001", "SK에너지", "경유", 20000, 1602],
     ["S002", "GS칼텍스", "휘발유", 12000, 1655],
     ["S003", "현대오일뱅크", "경유", 15000, 1598],
-    ["S004", "에쓰오일", "LPG", 8000, 1010],
+    ["S004", "에쓰오일", "휘발유", 8000, 1655],
   ];
   const oil = oilBase.map((r, i) => {
     const qty = r[3] + k * 500;
@@ -314,7 +306,7 @@ export const FUEL = {
     summary: "2026-07-27 · 논산점 · 전체 노즐 · 전체 결제구분",
     metrics: [
       { label: "판매건수", value: "96", unit: "건", note: "POS 수신 기준" },
-      { label: "판매수량", value: "7,914", unit: "L", note: "경유 58% · LPG 24%" },
+      { label: "판매수량", value: "7,914", unit: "L", note: "경유 58% · 휘발유 32%" },
       { label: "판매금액", value: "11,424,000", unit: "원", tone: "accent", note: "전일 대비 -1.2%" },
       { label: "카드매출", value: "7,444,000", unit: "원", note: "65.2%" },
       { label: "미확정", value: "3", unit: "건", tone: "warning", note: "VAN 응답 지연" },
@@ -326,7 +318,7 @@ export const FUEL = {
 export const FUEL_FILTERS = [
   { label: "판매일자", kind: "date", value: "2026-07-27" },
   { label: "노즐", kind: "select", options: ["전체", "1번", "2번", "3번", "4번"] },
-  { label: "제품", kind: "select", options: ["전체", "경유", "휘발유", "LPG"] },
+  { label: "제품", kind: "select", options: ["전체", "경유", "휘발유"] },
   { label: "판매구분", kind: "select", options: ["전체", "현금", "카드", "외상"] },
   { label: "고객명", kind: "text", placeholder: "고객명 검색" },
 ];
@@ -366,12 +358,11 @@ export const MASTER = {
       rows: [
         ["1", "FUEL_TYPE", "F01", "경유", "Diesel", "1", "사용:green", "2026-01-04", "이지훈"],
         ["2", "FUEL_TYPE", "F02", "휘발유", "Gasoline", "2", "사용:green", "2026-01-04", "이지훈"],
-        ["3", "FUEL_TYPE", "F03", "LPG", "LPG", "3", "사용:green", "2026-01-04", "이지훈"],
-        ["4", "PAY_TYPE", "P01", "현금", "Cash", "1", "사용:green", "2026-01-04", "김태형"],
-        ["5", "PAY_TYPE", "P02", "카드", "Card", "2", "사용:green", "2026-01-04", "김태형"],
-        ["6", "PAY_TYPE", "P03", "외상", "Credit", "3", "사용:green", "2026-01-04", "김태형"],
-        ["7", "IF_STATUS", "S04", "보류", "Hold", "4", "미사용:gray", "2026-03-11", "이지훈"],
-        ["8", "TAX_TYPE", "T01", "과세", "Taxable", "1", "사용:green", "2026-01-04", "이지훈"],
+        ["3", "PAY_TYPE", "P01", "현금", "Cash", "1", "사용:green", "2026-01-04", "김태형"],
+        ["4", "PAY_TYPE", "P02", "카드", "Card", "2", "사용:green", "2026-01-04", "김태형"],
+        ["5", "PAY_TYPE", "P03", "외상", "Credit", "3", "사용:green", "2026-01-04", "김태형"],
+        ["6", "IF_STATUS", "S04", "보류", "Hold", "4", "미사용:gray", "2026-03-11", "이지훈"],
+        ["7", "TAX_TYPE", "T01", "과세", "Taxable", "1", "사용:green", "2026-01-04", "이지훈"],
       ],
       foot: null,
     }],
@@ -435,7 +426,7 @@ export const SALES = {
     label: "매출 현황 조회", short: "매출 현황", code: "010080",
     title: "매출 현황 조회", sub: "· JTGS010080 · 일별·월별 매출 집계 조회",
     summary: "2026-07 · 전체 주유소 · 전체 결제구분",
-    filters: [F.month("조회월"), F.station(), F.sel("결제구분", ["전체", "현금", "카드", "외상"]), F.sel("제품", ["전체", "경유", "휘발유", "LPG"])],
+    filters: [F.month("조회월"), F.station(), F.sel("결제구분", ["전체", "현금", "카드", "외상"]), F.sel("제품", ["전체", "경유", "휘발유"])],
     metrics: [
       { label: "당월 매출", value: "421,840,000", unit: "원", tone: "accent", note: "전월 대비 +3.8%" },
       { label: "유류 매출", value: "398,210,000", unit: "원", note: "94.4%" },
@@ -603,11 +594,11 @@ export const STOCK = {
     label: "재고 현황", short: "재고 현황", code: "010120",
     title: "재고 현황", sub: "· JTGS010120 · 유종별 재고·입출고·조정 현황",
     summary: "2026-07-27 · 전체 주유소 · 전체 유종",
-    filters: [F.date("기준일"), F.station(), F.sel("유종", ["전체", "경유", "휘발유", "LPG"]), F.sel("상태", ["전체", "정상", "주의", "부족"])],
+    filters: [F.date("기준일"), F.station(), F.sel("유종", ["전체", "경유", "휘발유"]), F.sel("상태", ["전체", "정상", "주의", "부족"])],
     metrics: [
       { label: "총 재고량", value: "412,800", unit: "L", note: "9개 탱크" },
       { label: "정상 탱크", value: "7", unit: "기", tone: "success", note: "77.8%" },
-      { label: "주의 탱크", value: "2", unit: "기", tone: "warning", note: "논산 LPG 외" },
+      { label: "주의 탱크", value: "2", unit: "기", tone: "warning", note: "김해 휘발유 외" },
       { label: "당일 입고", value: "55,000", unit: "L", note: "3건" },
       { label: "당일 출고", value: "29,064", unit: "L", note: "판매 기준" },
     ],
@@ -621,7 +612,7 @@ export const STOCK = {
           ["3", "김해점", "T-01", "경유", "100,000", "85,000", "85%", "25,000", "7.5일", "정상:green"],
           ["4", "김해점", "T-02", "휘발유", "60,000", "26,400", "44%", "18,000", "3.1일", "주의:warn"],
           ["5", "논산점", "T-01", "경유", "80,000", "72,800", "91%", "20,000", "9.2일", "정상:green"],
-          ["6", "논산점", "T-03", "LPG", "40,000", "13,200", "33%", "12,000", "1.8일", "주의:warn"],
+          ["6", "논산점", "T-02", "휘발유", "50,000", "19,000", "38%", "15,000", "2.4일", "주의:warn"],
         ],
         foot: [["합계 (6기 표시 / 전체 9기)", 4, "c"], ["410,000", 1, "r"], ["284,000", 1, "r"], ["", 4, "l"]],
       },
@@ -631,10 +622,10 @@ export const STOCK = {
         rows: [
           ["1", "07-27 06:20", "배양점", "경유", "입고", "20,000", "1,602", "32,040,000", "SK에너지", "SL2607100"],
           ["2", "07-27 07:10", "김해점", "휘발유", "입고", "12,000", "1,655", "19,860,000", "GS칼텍스", "SL2607101"],
-          ["3", "07-27 08:40", "논산점", "LPG", "입고", "8,000", "1,010", "8,080,000", "에쓰오일", "SL2607103"],
+          ["3", "07-27 08:40", "논산점", "휘발유", "입고", "8,000", "1,655", "13,240,000", "에쓰오일", "SL2607103"],
           ["4", "07-27 23:00", "배양점", "경유", "출고", "6,120", "1,684", "10,306,080", "판매", "SO2607271"],
           ["5", "07-27 23:00", "김해점", "경유", "출고", "7,480", "1,684", "12,596,320", "판매", "SO2607272"],
-          ["6", "07-27 23:00", "논산점", "LPG", "출고", "3,240", "1,092", "3,538,080", "판매", "SO2607273"],
+          ["6", "07-27 23:00", "논산점", "휘발유", "출고", "3,240", "1,742", "5,644,080", "판매", "SO2607273"],
         ],
         foot: [["합계 (6건 표시)", 5, "c"], ["56,840", 1, "r"], ["", 1, "r"], ["86,420,480", 1, "r"], ["", 2, "l"]],
       },
@@ -644,7 +635,7 @@ export const STOCK = {
         rows: [
           ["1", "2026-07-26", "배양점", "경유", "57,840", "57,600", "-240", "온도 보정 손실", "승인:green", "이지훈"],
           ["2", "2026-07-26", "김해점", "휘발유", "26,300", "26,400", "+100", "계량기 오차 보정", "승인:green", "이지훈"],
-          ["3", "2026-07-26", "논산점", "LPG", "13,520", "13,200", "-320", "누유 점검 진행", "대기:warn", "정민아"],
+          ["3", "2026-07-26", "논산점", "휘발유", "19,320", "19,000", "-320", "재고 실사 진행", "대기:warn", "정민아"],
           ["4", "2026-06-30", "배양점", "휘발유", "31,100", "31,050", "-50", "월말 실사 반영", "승인:green", "김태형"],
         ],
         foot: null,
@@ -659,7 +650,7 @@ export const STOCK = {
     metrics: [
       { label: "등록 탱크", value: "9", unit: "기", note: "3개 주유소" },
       { label: "확정", value: "8", unit: "기", tone: "success", note: "88.9%" },
-      { label: "미확정", value: "1", unit: "기", tone: "warning", note: "논산 LPG" },
+      { label: "미확정", value: "1", unit: "기", tone: "warning", note: "논산 휘발유" },
       { label: "기초재고 금액", value: "534,120,000", unit: "원", tone: "accent", note: "2026-01-01 기준" },
     ],
     tabs: [{
@@ -671,7 +662,7 @@ export const STOCK = {
         ["3", "2026-01-01", "김해점", "T-01", "경유", "88,200", "1,588", "140,061,600", "확정:green", "이지훈"],
         ["4", "2026-01-01", "김해점", "T-02", "휘발유", "28,400", "1,640", "46,576,000", "확정:green", "이지훈"],
         ["5", "2026-01-01", "논산점", "T-01", "경유", "74,100", "1,588", "117,670,800", "확정:green", "김태형"],
-        ["6", "2026-01-01", "논산점", "T-03", "LPG", "16,800", "988", "16,598,400", "미확정:warn", "-"],
+        ["6", "2026-01-01", "논산점", "T-02", "휘발유", "22,000", "1,655", "36,410,000", "미확정:warn", "-"],
       ],
       foot: [["합계 (6기 표시 / 전체 9기)", 5, "c"], ["300,900", 1, "r"], ["", 1, "r"], ["470,838,000", 1, "r"], ["", 2, "l"]],
     }],
@@ -712,7 +703,7 @@ export const CLOSE = {
           ["2", "김해점", "카드 승인 vs VAN 수신", "10,490,000", "10,430,000", "-60,000", "오류:red", "VAN 재수신 후 재검증"],
           ["3", "김해점", "현금 시재 vs 계산 시재", "5,110,000", "5,110,000", "0", "정상:green", "-"],
           ["4", "논산점", "탱크 재고 vs 판매 차감", "72,800", "72,760", "-40", "주의:warn", "온도 보정 조정 등록 필요"],
-          ["5", "논산점", "LPG 안전재고 도달", "12,000", "13,200", "+1,200", "정상:green", "-"],
+          ["5", "논산점", "휘발유 안전재고 근접", "15,000", "19,000", "+4,000", "정상:green", "-"],
           ["6", "배양점", "전 항목 검증", "-", "-", "0", "정상:green", "마감 완료"],
         ],
         foot: null,
@@ -821,28 +812,28 @@ export const DASH = {
 
 
 export const STACK = [
-  { area: "Frontend", tone: "accent", rows: [
-    { cat: "Frontend Framework", items: ["Next.js (App Router)", "React 18"], why: "SSR/CSR 하이브리드 지원, 파일 시스템 기반 라우팅, 초기 로딩 최적화(RSC)" },
-    { cat: "UI Kit & Styling", items: ["Tailwind CSS", "shadcn/ui"], why: "모바일·태블릿·데스크톱 대응 반응형 디자인, Atomic Design 컴포넌트 계층 적용" },
-    { cat: "State & Data Fetching", items: ["Zustand", "TanStack Query", "Axios"], why: "전역 상태 관리(auth/ui), 서버 데이터 Caching/SWR 관리, 공통 인터셉터" },
+  { area: "Frontend (적용)", tone: "accent", rows: [
+    { cat: "Frontend Framework", items: ["Vite", "React 19"], why: "GitHub Pages CSR 배포, 빠른 HMR·번들링. Next.js/SSR은 목표 아키텍처로 보류" },
+    { cat: "UI Kit & Styling", items: ["Tailwind CSS", "--fass-* Design Tokens"], why: "반응형 유틸 + FaSS 토큰 변수로 관리화면 룩 유지" },
+    { cat: "State & Data Fetching", items: ["Zustand", "TanStack Query"], why: "전역 UI/마스터 상태(Zustand), 목업 async 조회·캐시·재조회(TanStack Query)" },
   ] },
-  { area: "Backend · Data", tone: "success", rows: [
-    { cat: "Backend Framework", items: ["Java 21", "Spring Boot 3.3.x"], why: "FaSS Platform 표준 백엔드, 가상 스레드(Virtual Threads) 기반 고동시성 I/O 처리" },
-    { cat: "Database & ORM", items: ["PostgreSQL", "MyBatis / JPA", "QueryDSL"], why: "FaSS 표준 DB 및 Row-Level Security(COMPANY_CD) 격리, 차세대 ORM 검토 반영" },
-    { cat: "Message Queue & Cache", items: ["Kafka", "Redis"], why: "대용량 비동기 메시징 및 AI 연동 파이프라인(Kafka), 세션 공유·Rate Limit 캐싱(Redis)" },
+  { area: "Backend · Data (목표·미연동)", tone: "success", rows: [
+    { cat: "Backend Framework", items: ["Java 21", "Spring Boot 3.3.x"], why: "FaSS Platform 표준 백엔드 — 현재 프론트 목업만 동작, API 미연동" },
+    { cat: "Database & ORM", items: ["PostgreSQL", "MyBatis / JPA", "QueryDSL"], why: "목표 스토어·RLS(COMPANY_CD) — 현재 클라이언트 시드 데이터 사용" },
+    { cat: "Message Queue & Cache", items: ["Kafka", "Redis"], why: "목표 비동기·캐시 계층 — 현재 미연동" },
   ] },
-  { area: "Security · Infra", tone: "warning", rows: [
-    { cat: "Security & IAM", items: ["Keycloak"], why: "사내 LDAP 연동, 다중 인증(MFA), RBAC 및 SSO 체계 구축" },
-    { cat: "Infra & Observability", items: ["Docker", "Spring Cloud Gateway", "Nginx", "Grafana", "Prometheus"], why: "단일 진입점(Gateway), 웹 방화벽·망 분리, 시스템 메트릭 실시간 관제 및 알림" },
+  { area: "Security · Infra (목표·미연동)", tone: "warning", rows: [
+    { cat: "Security & IAM", items: ["Keycloak"], why: "목표 SSO·MFA·RBAC — 현재 데모 사용자 고정 표시" },
+    { cat: "Infra & Observability", items: ["GitHub Pages", "vite-plugin-pwa", "Docker*", "Grafana*"], why: "현재 Pages+PWA 배포. Docker/Grafana 등은 목표 관제(*미연동)" },
   ] },
 ];
 
 export const LAYERS = [
-  { name: "Client", tone: "accent", note: "외부망 · PWA", nodes: ["Next.js 15 App Router", "React 18 · Tailwind · shadcn/ui", "Zustand · TanStack Query"] },
-  { name: "Edge / Gateway", tone: "warning", note: "DMZ", nodes: ["Nginx + WAF (TLS 1.3)", "Spring Cloud Gateway", "Keycloak SSO · MFA"] },
-  { name: "Application", tone: "success", note: "내부망", nodes: ["Java 21 · Spring Boot 3.3", "Virtual Threads", "Resilience4j 서킷브레이커"] },
-  { name: "Data / Async", tone: "navy", note: "표준 스토어", nodes: ["PostgreSQL (RLS: COMPANY_CD)", "MyBatis · JPA · QueryDSL", "Kafka · Redis"] },
-  { name: "Observability", tone: "muted", note: "관제", nodes: ["Prometheus", "Grafana", "Alert Rules"] },
+  { name: "Client", tone: "accent", note: "외부망 · PWA", nodes: ["Vite · React 19 · Tailwind", "--fass-* Tokens · Zustand", "TanStack Query · GitHub Pages"] },
+  { name: "Edge / Gateway", tone: "warning", note: "DMZ · 목표", nodes: ["Nginx + WAF (TLS 1.3)*", "Spring Cloud Gateway*", "Keycloak SSO · MFA*"] },
+  { name: "Application", tone: "success", note: "내부망 · 목표", nodes: ["Java 21 · Spring Boot 3.3*", "Virtual Threads*", "Resilience4j*"] },
+  { name: "Data / Async", tone: "navy", note: "목표 스토어", nodes: ["PostgreSQL (RLS)*", "MyBatis · JPA · QueryDSL*", "Kafka · Redis*"] },
+  { name: "Observability", tone: "muted", note: "목표 관제", nodes: ["Prometheus*", "Grafana*", "Alert Rules*"] },
 ];
 
 export const REQS = [
@@ -853,7 +844,7 @@ export const REQS = [
     ["실적 입력 및 영업 관리", "FR-02-01", "통합 유류/비유류 실적 입력", "지점별 파편화된 화면을 단일 UI로 통합, 접속 권한에 따른 필터링 자동 적용", "필수", ""],
     ["실적 입력 및 영업 관리", "FR-02-02", "PWA/모바일 최적화", "현장 작업자가 태블릿·모바일에서 실적을 즉시 입력할 수 있는 반응형 폼", "필수", ""],
     ["실적 입력 및 영업 관리", "FR-02-03", "실시간 입력 검증", "입력 단가·수량 이상치 감지 및 실시간 유효성 검증 알림", "중요", ""],
-    ["대시보드 및 실시간 조회", "FR-03-01", "SSR 기반 초고속 대시보드", "전체 지점 매출·현금 수불 현황을 SSR로 초기 빠른 로딩(FCP) 제공", "필수", ""],
+    ["대시보드 및 실시간 조회", "FR-03-01", "CSR·캐시 기반 대시보드", "GitHub Pages CSR + TanStack Query 캐시로 지점 매출·현황 초기 로딩 최적화(SSR은 목표)", "필수", ""],
     ["대시보드 및 실시간 조회", "FR-03-02", "실시간 BI 시각화", "Apache Superset 연동으로 유류 판매 추이·매출 목표 달성률 시각화", "중요", "한성민 프로 진행"],
     ["채권 및 외상 관리", "FR-04-01", "외상 거래처 잔고 관리", "거래처별 외상 한도, 실시간 잔고 추적 및 외상 매출 기록", "필수", ""],
     ["채권 및 외상 관리", "FR-04-02", "입금 자동 매칭", "가상계좌 입금 이벤트 발생 시 외상 대금 자동 차감 처리", "중요", "재무팀 검토 필요"],
