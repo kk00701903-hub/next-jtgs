@@ -299,7 +299,7 @@ export class JtgsApp extends ReactComponent {
         (!isGrid && r.key === view);
       r.style = {
         display: "flex", alignItems: "center", gap: "8px",
-        padding: "8px 16px", fontSize: "12px", cursor: "pointer",
+        padding: "8px 16px", fontSize: "14px", cursor: "pointer",
         borderLeft: active ? "3px solid #60A5FA" : "3px solid transparent",
         background: active ? "rgba(255,255,255,.12)" : "transparent",
         color: active ? "#fff" : "rgba(255,255,255,.75)",
@@ -313,7 +313,7 @@ export class JtgsApp extends ReactComponent {
         label: G.items[k].short, code: G.items[k].code,
         style: {
           display: "inline-flex", alignItems: "center", gap: "6px",
-          height: "28px", padding: "0 14px", borderRadius: "999px", cursor: "pointer",
+          height: "32px", padding: "0 14px", borderRadius: "999px", cursor: "pointer",
           fontSize: "var(--font-size-xs)", fontWeight: 900,
           border: on ? "1px solid var(--fass-accent)" : "1px solid transparent",
           background: on ? "var(--fass-accent)" : "transparent",
@@ -321,7 +321,7 @@ export class JtgsApp extends ReactComponent {
           transition: "background .15s,color .15s",
         },
         codeStyle: {
-          fontSize: "9px", fontWeight: 800, letterSpacing: ".02em",
+          fontSize: "11px", fontWeight: 800, letterSpacing: ".02em",
           padding: "1px 5px", borderRadius: "999px",
           background: on ? "rgba(255,255,255,.22)" : "var(--fass-line-soft)",
           color: on ? "#fff" : "var(--fass-subtle)",
@@ -346,7 +346,7 @@ export class JtgsApp extends ReactComponent {
           boxShadow: on ? "inset 0 -2px 0 var(--fass-accent)" : "none",
         },
         countStyle: {
-          fontSize: "10px", fontWeight: 800, padding: "1px 6px", borderRadius: "999px",
+          fontSize: "12px", fontWeight: 800, padding: "1px 6px", borderRadius: "999px",
           background: on ? "var(--fass-accent-soft)" : "var(--fass-line-soft)",
           color: on ? "var(--fass-accent-strong)" : "var(--fass-subtle)",
         },
@@ -409,7 +409,7 @@ export class JtgsApp extends ReactComponent {
               name: n,
               style: {
                 display: "inline-flex", alignItems: "center", minHeight: "22px", padding: "3px 9px",
-                whiteSpace: "nowrap", borderRadius: "999px", fontSize: "11px", fontWeight: 800,
+                whiteSpace: "nowrap", borderRadius: "999px", fontSize: "13px", fontWeight: 800,
                 fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace",
                 background: "var(--fass-surface)", border: "1px solid var(--fass-line-strong)",
                 color: "var(--fass-text)",
@@ -450,7 +450,7 @@ export class JtgsApp extends ReactComponent {
           rowStyle: { cursor: "pointer", background: this.state.selRec.req === i ? "var(--fass-accent-soft)" : "transparent" },
           priStyle: ((pri) => ({
             display: "inline-flex", alignItems: "center", height: "20px", padding: "0 8px",
-            borderRadius: "999px", fontSize: "11px", fontWeight: 800,
+            borderRadius: "999px", fontSize: "13px", fontWeight: 800,
             background: pri === "필수" ? "var(--fass-danger-soft)" : pri === "중요" ? "var(--fass-warning-soft)" : "var(--fass-line-soft)",
             color: pri === "필수" ? "var(--fass-danger)" : pri === "중요" ? "var(--fass-warning)" : "var(--fass-muted)",
           }))(r.pri),
@@ -529,7 +529,7 @@ export class JtgsApp extends ReactComponent {
       })),
       dashKpis: DASH.kpis.map((k) => ({
         label: k.label, value: k.value, note: k.note,
-        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "26px", fontWeight: 800, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
+        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "30px", fontWeight: 800, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
         cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "14px 16px", background: "var(--fass-surface)", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(k.tone), borderRadius: "var(--fass-radius-lg)", boxShadow: "var(--shadow-sm)" },
       })),
       dashStations: DASH.stations.map((s) => ({
@@ -542,7 +542,7 @@ export class JtgsApp extends ReactComponent {
         state: s.fuels.some((f) => f.tone === "warning") ? "주의" : "정상",
         stateStyle: {
           display: "inline-flex", alignItems: "center", height: "18px", padding: "0 8px", borderRadius: "999px",
-          fontSize: "10px", fontWeight: 800,
+          fontSize: "12px", fontWeight: 800,
           background: s.fuels.some((f) => f.tone === "warning") ? "var(--fass-warning-soft)" : "var(--fass-success-soft)",
           color: s.fuels.some((f) => f.tone === "warning") ? "var(--fass-warning)" : "var(--fass-success)",
         },

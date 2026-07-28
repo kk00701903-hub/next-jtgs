@@ -37,10 +37,10 @@ export function Shell({ v }) {
     
       <nav style={sx(`width:224px;flex-shrink:0;background:var(--fass-navy);color:#fff;display:flex;flex-direction:column;box-shadow:2px 0 8px rgba(0,0,0,.15)`)}>
         <div style={sx(`display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1)`)}>
-          <div style={sx(`width:32px;height:32px;flex-shrink:0;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;letter-spacing:-.02em`)}>JT</div>
+          <div style={sx(`width:32px;height:32px;flex-shrink:0;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;letter-spacing:-.02em`)}>JT</div>
           <div style={sx(`display:flex;flex-direction:column;gap:1px`)}>
-            <span style={sx(`font-size:13px;font-weight:800;letter-spacing:-.01em`)}>주유소 관리시스템</span>
-            <span style={sx(`font-size:10px;opacity:.55`)}>JETTE Supply Control · FASS</span>
+            <span style={sx(`font-size:15px;font-weight:800;letter-spacing:-.01em`)}>주유소 관리시스템</span>
+            <span style={sx(`font-size:12px;opacity:.55`)}>JETTE Supply Control · FASS</span>
           </div>
         </div>
     
@@ -48,11 +48,11 @@ export function Shell({ v }) {
           {(navRows || []).map((row, row__i) => (
     <React.Fragment key={row__i}>
     {row.isGroup ? (
-    <><div style={sx(`padding:12px 16px 4px;font-size:10px;font-weight:800;letter-spacing:.08em;opacity:.45;text-transform:uppercase`)}>{row.label}</div></>
+    <><div style={sx(`padding:12px 16px 4px;font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.45;text-transform:uppercase`)}>{row.label}</div></>
     ) : null}
             {row.isItem ? (
     <><div onClick={row.onClick} style={row.style}>
-                <span style={sx(`width:16px;flex-shrink:0;text-align:center;font-size:11px;opacity:.8`)}>{row.mark}</span>
+                <span style={sx(`width:16px;flex-shrink:0;text-align:center;font-size:13px;opacity:.8`)}>{row.mark}</span>
                 <span style={sx(`min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`)}>{row.label}</span>
               </div></>
     ) : null}
@@ -61,18 +61,18 @@ export function Shell({ v }) {
         </div>
     
         <div style={sx(`display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid rgba(255,255,255,.1)`)}>
-          <div style={sx(`width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800`)}>한</div>
+          <div style={sx(`width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800`)}>한</div>
           <div style={sx(`display:flex;flex-direction:column;gap:1px;min-width:0`)}>
-            <span style={sx(`font-size:12px;font-weight:700`)}>한성민 프로</span>
-            <span style={sx(`font-size:10px;opacity:.55`)}>정보전략팀</span>
+            <span style={sx(`font-size:14px;font-weight:700`)}>한성민 프로</span>
+            <span style={sx(`font-size:12px;opacity:.55`)}>정보전략팀</span>
           </div>
         </div>
       </nav>
     
       <div style={sx(`flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden`)}>
     
-        <div style={sx(`height:52px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--fass-surface);border-bottom:1px solid var(--fass-line);box-shadow:var(--shadow-sm)`)}>
-          <strong style={sx(`font-size:15px;font-weight:900;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0`)}>{headTitle}</strong>
+        <div style={sx(`height:56px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--fass-surface);border-bottom:1px solid var(--fass-line);box-shadow:var(--shadow-sm)`)}>
+          <strong style={sx(`font-size:17px;font-weight:900;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0`)}>{headTitle}</strong>
           <span style={sx(`font-size:var(--font-size-sm);color:var(--fass-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`)}>{headSub}</span>
           <div style={sx(`flex:1`)}></div>
           <span style={sx(`font-size:var(--font-size-xs);font-weight:700;color:var(--fass-muted);background:var(--fass-bg);border:1px solid var(--fass-line);border-radius:var(--fass-radius-md);padding:5px 10px;white-space:nowrap;flex-shrink:0`)}>2026-07-27 (월) 16:04 기준</span>
@@ -98,7 +98,7 @@ export function Shell({ v }) {
                 <div style={sx(`display:flex;align-items:center;gap:10px;height:42px;padding:0 12px;border-bottom:1px solid var(--fass-line)`)}>
                   <strong style={sx(`font-size:var(--font-size-sm);font-weight:900;flex-shrink:0`)}>조회 조건</strong>
                   <span style={sx(`min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-xs);font-weight:750;color:var(--fass-muted)`)}>{summary}</span>
-                  <button onClick={toggleCollapse} style={sx(`margin-left:auto;flex-shrink:0;height:28px;padding:0 14px;border-radius:999px;font-size:var(--font-size-xs);font-weight:900;cursor:pointer;border:1px solid var(--fass-accent-line);background:var(--fass-accent-soft);color:var(--fass-accent-strong);transition:background .15s,color .15s`)}>{collapseLabel}</button>
+                  <button onClick={toggleCollapse} style={sx(`margin-left:auto;flex-shrink:0;height:32px;padding:0 14px;border-radius:999px;font-size:var(--font-size-xs);font-weight:900;cursor:pointer;border:1px solid var(--fass-accent-line);background:var(--fass-accent-soft);color:var(--fass-accent-strong);transition:background .15s,color .15s`)}>{collapseLabel}</button>
                 </div>
                 {expanded ? (
     <><div style={sx(`display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px;padding:12px`)}>
@@ -309,7 +309,7 @@ export function Shell({ v }) {
                           <div style={l.dotStyle}></div>
                           <div style={sx(`display:flex;flex-direction:column;gap:2px;min-width:0`)}>
                             <span style={sx(`font-size:var(--font-size-sm);color:var(--fass-text);line-height:1.4`)}>{l.text}</span>
-                            <span style={sx(`font-size:10px;color:var(--fass-subtle)`)}>{l.meta}</span>
+                            <span style={sx(`font-size:12px;color:var(--fass-subtle)`)}>{l.meta}</span>
                           </div>
                         </div>
     ))}
@@ -324,7 +324,7 @@ export function Shell({ v }) {
                       {(dashJump || []).map((j, j__i) => (
     <button key={j__i} onClick={j.onClick} style={sx(`display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:10px 12px;background:var(--fass-surface-alt);border:1px solid var(--fass-line);border-radius:var(--fass-radius-md);cursor:pointer;text-align:left`)}>
                           <span style={sx(`font-size:var(--font-size-sm);font-weight:800;color:var(--fass-text)`)}>{j.label}</span>
-                          <span style={sx(`font-size:10px;color:var(--fass-muted)`)}>{j.note}</span>
+                          <span style={sx(`font-size:12px;color:var(--fass-muted)`)}>{j.note}</span>
                         </button>
     ))}
                     </div>
@@ -383,7 +383,7 @@ export function Shell({ v }) {
                       <div style={sx(`display:flex;flex-direction:column;gap:5px;min-width:0;flex:1`)}>
                         <div style={sx(`display:flex;align-items:baseline;gap:6px`)}>
                           <span style={sx(`font-size:var(--font-size-sm);font-weight:900;color:var(--fass-text)`)}>{l.name}</span>
-                          <span style={sx(`font-size:10px;color:var(--fass-subtle);font-weight:700`)}>{l.note}</span>
+                          <span style={sx(`font-size:12px;color:var(--fass-subtle);font-weight:700`)}>{l.note}</span>
                         </div>
                         <div style={sx(`display:flex;flex-direction:column;gap:3px`)}>
                           {(l.nodes || []).map((n, n__i) => (
@@ -498,7 +498,7 @@ export function Shell({ v }) {
     
         </div>
     
-        <div style={sx(`height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--fass-surface);border-top:1px solid var(--fass-line);font-size:var(--font-size-xs);color:var(--fass-muted)`)}>
+        <div style={sx(`height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--fass-surface);border-top:1px solid var(--fass-line);font-size:var(--font-size-xs);color:var(--fass-muted)`)}>
           <span>{statusLeft}</span>
           <span>{statusRight}</span>
         </div>
@@ -510,7 +510,7 @@ export function Shell({ v }) {
             <div style={sx(`display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-bottom:1px solid var(--fass-line);flex-shrink:0`)}>
               <strong style={sx(`font-size:var(--font-size-md);font-weight:900`)}>{modalTitle}</strong>
               <span style={sx(`min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-xs);color:var(--fass-muted)`)}>{modalSub}</span>
-              <button onClick={closeModal} style={sx(`margin-left:auto;flex-shrink:0;width:28px;height:28px;border-radius:var(--fass-radius-md);border:1px solid var(--fass-line);background:var(--fass-surface);color:var(--fass-muted);font-size:14px;font-weight:800;cursor:pointer`)}>×</button>
+              <button onClick={closeModal} style={sx(`margin-left:auto;flex-shrink:0;width:28px;height:28px;border-radius:var(--fass-radius-md);border:1px solid var(--fass-line);background:var(--fass-surface);color:var(--fass-muted);font-size:16px;font-weight:800;cursor:pointer`)}>×</button>
             </div>
     
             <div className="fass-scroll" style={sx(`flex:1;overflow-y:auto;padding:16px`)}>
