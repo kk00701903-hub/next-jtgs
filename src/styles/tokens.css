@@ -97,6 +97,10 @@ select.fass-field{cursor:pointer}
   border-bottom:1px solid var(--fass-line);flex-shrink:0;
 }
 .fass-panel__body{padding:16px}
+.fass-toolbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 16px;overflow:visible;
+}
 .fass-metric{
   display:flex;flex-direction:column;gap:6px;padding:16px 18px;
   background:var(--fass-surface);border:1px solid var(--fass-line);
@@ -169,6 +173,18 @@ select.fass-field{cursor:pointer}
   color:#fff;font-weight:600;
 }
 .fass-nav-item:focus-visible{outline:2px solid #93C5FD;outline-offset:-2px}
+@media (min-width:768px){
+  .fass-nav-item.is-compact{justify-content:center;padding:11px 0}
+}
+.fass-nav-divider{height:1px;margin:10px 12px;background:rgba(255,255,255,.12)}
+.fass-nav-toggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;flex-shrink:0;
+  border:1px solid var(--fass-line-strong);border-radius:var(--fass-radius-md);
+  background:var(--fass-surface);color:var(--fass-muted);cursor:pointer;
+  transition:background .12s ease,color .12s ease,border-color .12s ease;
+}
+.fass-nav-toggle:hover{background:var(--fass-surface-alt);color:var(--fass-text);border-color:var(--fass-muted)}
 
 /* Segment / tabs */
 .fass-seg{

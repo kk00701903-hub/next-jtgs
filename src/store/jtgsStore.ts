@@ -45,6 +45,7 @@ type JtgsState = {
   filterDraft: Record<string, string>
   filterApplied: Record<string, string>
   sidebarOpen: boolean
+  navCollapsed: boolean
   ifRowOverrides: Record<string, string[][]>
   setView: (view: string) => void
   select: (gk: string, k: string) => void
@@ -65,6 +66,7 @@ type JtgsState = {
   applyFilters: () => void
   setSidebarOpen: (v: boolean) => void
   toggleSidebar: () => void
+  toggleNavCollapsed: () => void
   setIfRowOverrides: (key: string, rows: string[][]) => void
 }
 
@@ -84,6 +86,7 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   filterDraft: {},
   filterApplied: {},
   sidebarOpen: false,
+  navCollapsed: false,
   ifRowOverrides: {},
   setView: (view) => set({ view, tab: null, sel: null, msg: '', sidebarOpen: false, collapsed: true }),
   select: (gk, k) =>
@@ -119,6 +122,7 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   applyFilters: () => set((s) => ({ filterApplied: { ...s.filterDraft } })),
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  toggleNavCollapsed: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
   setIfRowOverrides: (key, rows) =>
     set((s) => ({ ifRowOverrides: { ...s.ifRowOverrides, [key]: rows } })),
 }))

@@ -517,6 +517,8 @@ class JtgsAppCore extends ReactComponent {
       sidebarOpen: this.props.store.sidebarOpen,
       toggleSidebar: () => this.props.store.toggleSidebar(),
       closeSidebar: () => this.props.store.setSidebarOpen(false),
+      navCollapsed: this.props.store.navCollapsed,
+      toggleNavCollapsed: () => this.props.store.toggleNavCollapsed(),
       refreshAll: () => {
         this.props.queryClient?.invalidateQueries?.({ queryKey: ["dashboard"] });
         this.props.queryClient?.invalidateQueries?.({ queryKey: ["grid"] });
@@ -552,13 +554,13 @@ class JtgsAppCore extends ReactComponent {
       })),
       dashKpis: dash.kpis.map((k) => ({
         label: k.label, value: k.value, note: k.note,
-        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "30px", fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
-        cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "14px 16px", background: "var(--fass-surface)", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(k.tone), borderRadius: "var(--fass-radius-lg)", boxShadow: "var(--shadow-sm)" },
+        valueStyle: { fontSize: String(k.value).length > 8 ? "var(--font-size-lg)" : "26px", fontWeight: 700, lineHeight: 1.1, fontVariantNumeric: "tabular-nums", color: this.tone(k.tone) },
+        cardStyle: { display: "flex", flexDirection: "column", gap: "6px", padding: "14px 16px", background: "var(--fass-surface)", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(k.tone), borderRadius: "var(--fass-radius-lg)", boxShadow: "var(--shadow-sm)" },
       })),
       dashStations: dash.stations.map((s) => ({
         name: s.name, rows: s.rows,
         badgeStyle: this.badgeStyle(s.badgeTone), badge: s.badge,
-        cardStyle: { display: "flex", flexDirection: "column", gap: "8px", padding: "16px 16px", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(s.tone), borderRadius: "var(--fass-radius-md)", background: "var(--fass-surface)", height: "100%" },
+        cardStyle: { display: "flex", flexDirection: "column", gap: "10px", padding: "14px 16px", border: "1px solid var(--fass-line)", borderLeft: "3px solid " + this.tone(s.tone), borderRadius: "var(--fass-radius-md)", background: "var(--fass-surface-alt)" },
       })),
       dashTanks: dash.tanks.map((s) => ({
         station: s.station,
