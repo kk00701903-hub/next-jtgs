@@ -46,6 +46,10 @@ type JtgsState = {
   filterApplied: Record<string, string>
   sidebarOpen: boolean
   navCollapsed: boolean
+  favorites: Record<string, boolean>
+  modalError: string
+  /** 요구 2: 일마감 캘린더에서 일자별로 직접 바꾼 open/close 상태 */
+  closeStates: Record<string, string>
   ifRowOverrides: Record<string, string[][]>
   setView: (view: string) => void
   select: (gk: string, k: string) => void
@@ -67,6 +71,9 @@ type JtgsState = {
   setSidebarOpen: (v: boolean) => void
   toggleSidebar: () => void
   toggleNavCollapsed: () => void
+  toggleFavorite: (key: string) => void
+  setModalError: (modalError: string) => void
+  setCloseState: (date: string, state: string) => void
   setIfRowOverrides: (key: string, rows: string[][]) => void
 }
 
@@ -87,6 +94,9 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   filterApplied: {},
   sidebarOpen: false,
   navCollapsed: false,
+  favorites: {},
+  modalError: '',
+  closeStates: {},
   ifRowOverrides: {},
   setView: (view) => set({ view, tab: null, sel: null, msg: '', sidebarOpen: false, collapsed: true }),
   select: (gk, k) =>
@@ -123,6 +133,11 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   toggleNavCollapsed: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
+  toggleFavorite: (key) =>
+    set((s) => ({ favorites: { ...s.favorites, [key]: !s.favorites[key] } })),
+  setModalError: (modalError) => set({ modalError }),
+  setCloseState: (date, state) =>
+    set((s) => ({ closeStates: { ...s.closeStates, [date]: state } })),
   setIfRowOverrides: (key, rows) =>
     set((s) => ({ ifRowOverrides: { ...s.ifRowOverrides, [key]: rows } })),
 }))

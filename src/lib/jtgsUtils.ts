@@ -10,6 +10,17 @@ export function maskCard(raw: string): string {
   return `${first}-****-****-${last}`
 }
 
+/** 요구 3: 신규 등록 기본일자를 당일로 */
+export function todayStr(): string {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+export function todayMonthStr(): string {
+  return todayStr().slice(0, 7)
+}
+
 export function parseNumberLoose(v: unknown): number | null {
   if (v === '' || v === null || v === undefined) return null
   const n = Number(String(v).replace(/,/g, '').trim())
@@ -35,6 +46,14 @@ export function validateRecDraft(
       if (n < 0) return `${label} 에 음수는 입력할 수 없습니다.`
       if (/단가/.test(label) && n > 100000) return `${label} 이상치 감지(100,000 초과). 확인 후 다시 입력하세요.`
       if (/수량/.test(label) && n > 1000000) return `${label} 이상치 감지. 확인 후 다시 입력하세요.`
+      // 요구 5: 수량은 소수점 4자리까지, 단가는 정수만
+      const decimals = (String(raw).split('.')[1] || '').replace(/[^0-9]/g, '').length
+      if (/수량/.test(label) && decimals > 4) {
+        return `${label} 은(는) 소수점 4자리까지 입력할 수 있습니다.`
+      }
+      if (/단가/.test(label) && !Number.isInteger(n)) {
+        return `${label} 은(는) 소수점 없이 정수로 입력하세요.`
+      }
     }
   }
   return null

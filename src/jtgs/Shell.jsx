@@ -16,10 +16,11 @@ export function Shell({ v }) {
   const {
     navRows, segments, tabs, cols, rows, foot, hasFoot,
     headTitle, headSub, summary, expanded, collapseLabel, toggleCollapse, doSearch, doResetFilters,
-    filters, metrics, gridTitle, gridCount, mergeNote, actions,
+    filters, metrics, gridTitle, gridCount, mergeNote, actions, calendar,
     segLabel, segNote,
-    isGrid, isDash, isArch, isReq, isCheck,
+    isGrid, isDash, isArch, isReq, isCheck, isTokens,
     checkGroups, checkMetrics,
+    tokenGroups, tokenMetrics, tokenNote,
     dashKpis, dashStations, dashTanks, dashIf, dashLog, dashJump, dashTankAlert,
     statusLeft, statusRight,
     hasModal, modalTitle, modalSub, closeModal, submitModal,
@@ -29,6 +30,7 @@ export function Shell({ v }) {
     reqHint, reqActions, reqTables,
     loading, sidebarOpen, toggleSidebar, closeSidebar, refreshAll,
     navCollapsed, toggleNavCollapsed,
+    isFavorite, toggleFavorite, userInitials, modalError,
   } = v;
 
   useEffect(() => {
@@ -118,7 +120,10 @@ export function Shell({ v }) {
             navCollapsed ? "px-[18px] md:px-0 md:justify-center" : "px-[18px]",
           ].join(" ")}
         >
-          <div className="w-[30px] h-[30px] shrink-0 rounded-full bg-white/20 flex items-center justify-center text-[13px] font-semibold">한</div>
+          <div className="fass-avatar w-[30px] h-[30px] rounded-full bg-white/20 flex items-center justify-center text-[13px] font-semibold">
+            {userInitials}
+            <span className="fass-avatar__dot" aria-hidden="true" />
+          </div>
           <div className={["flex flex-col gap-px min-w-0", navCollapsed ? "md:hidden" : ""].join(" ")}>
             <span className="text-sm font-semibold">한성민 프로</span>
             <span className="text-[12px] text-white/55">정보전략팀</span>
@@ -127,7 +132,7 @@ export function Shell({ v }) {
       </nav>
 
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <header className="h-14 shrink-0 flex items-center gap-3 px-5 bg-[var(--fass-surface)] border-b border-[var(--fass-line)] shadow-[var(--shadow-sm)]">
+        <header className="h-14 shrink-0 flex items-center gap-3 px-4 md:px-5 xl:px-6 bg-[var(--fass-surface)] border-b border-[var(--fass-line)] shadow-[var(--shadow-sm)]">
           <button type="button" className="fass-btn is-secondary is-sm md:hidden" onClick={toggleSidebar}>
             메뉴
           </button>
@@ -141,14 +146,24 @@ export function Shell({ v }) {
           >
             {navCollapsed ? "»" : "«"}
           </button>
+          <button
+            type="button"
+            className={["fass-star", isFavorite ? "is-on" : ""].filter(Boolean).join(" ")}
+            aria-pressed={isFavorite}
+            aria-label={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+            title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+            onClick={toggleFavorite}
+          >
+            {isFavorite ? "★" : "☆"}
+          </button>
           <h1 className="fass-title-page whitespace-nowrap shrink-0 m-0">{headTitle}</h1>
           <span className="hidden lg:block fass-muted min-w-0 overflow-hidden text-ellipsis whitespace-nowrap max-w-[38%]">{headSub}</span>
           <div className="flex-1" />
-          {loading ? <span className="fass-subtle text-[var(--fass-accent)] font-semibold">로딩…</span> : null}
+          {loading ? <span className="fass-spinner" role="status" aria-label="불러오는 중" /> : null}
           <button type="button" className="fass-btn is-secondary is-sm shrink-0" onClick={refreshAll}>새로고침</button>
         </header>
 
-        <div className="fass-scroll flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5">
+        <div className="fass-scroll flex-1 overflow-y-auto flex flex-col gap-5 px-4 md:px-5 xl:px-6 py-4 [&>*]:w-full [&>*]:max-w-[1800px] [&>*]:mx-auto">
           {isGrid ? (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3 flex-wrap">
@@ -172,14 +187,19 @@ export function Shell({ v }) {
               <section aria-label="조회 조건" className="fass-panel">
                 <div className="fass-panel__head">
                   <strong className="fass-title-section shrink-0">조회 조건</strong>
-                  <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap fass-label">{summary}</span>
-                  <button type="button" className="fass-btn is-secondary is-sm ml-auto shrink-0" onClick={toggleCollapse}>
+                  {expanded ? null : <span className="fass-panel__summary">{summary}</span>}
+                  <button
+                    type="button"
+                    className="fass-pill-toggle ml-auto"
+                    aria-expanded={expanded}
+                    onClick={toggleCollapse}
+                  >
                     {collapseLabel}
                   </button>
                 </div>
                 {expanded ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-4 p-4">
-                    <div className="min-w-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] items-end gap-x-4 gap-y-3">
+                  <div className="grid grid-cols-1 min-[1200px]:grid-cols-[minmax(0,1fr)_auto] items-end gap-4 p-4">
+                    <div className="min-w-0 grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(170px,220px))] items-end gap-x-4 gap-y-3">
                       {(filters || []).map((f, f__i) => (
                         <div key={f__i} className="flex flex-col gap-1.5">
                           <label className="fass-label">{f.label}</label>
@@ -196,9 +216,11 @@ export function Shell({ v }) {
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center justify-end gap-2">
-                      <button type="button" className="fass-btn is-ghost" onClick={doResetFilters}>초기화</button>
-                      <button type="button" className="fass-btn is-primary" onClick={doSearch}>조회</button>
+                    <div className="flex items-center justify-start min-[1200px]:justify-end gap-1.5">
+                      <button type="button" className="fass-btn is-ghost" disabled={loading} onClick={doResetFilters}>초기화</button>
+                      <button type="button" className="fass-btn is-primary" disabled={loading} onClick={doSearch}>
+                        {loading ? "조회 중…" : "조회"}
+                      </button>
                     </div>
                   </div>
                 ) : null}
@@ -241,6 +263,80 @@ export function Shell({ v }) {
                   ))}
                 </div>
 
+                {calendar ? (
+                  <div className="bg-[var(--fass-surface)] border border-t-0 border-[var(--fass-line)] rounded-b-[var(--fass-radius-lg)] p-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <button type="button" className="fass-btn is-icon" aria-label="이전 달" title="이전 달" onClick={calendar.onPrevMonth}>‹</button>
+                        <strong className="fass-title-section min-w-[92px] text-center">{calendar.monthLabel}</strong>
+                        <button type="button" className="fass-btn is-icon" aria-label="다음 달" title="다음 달" onClick={calendar.onNextMonth}>›</button>
+                      </div>
+                      <span className="fass-subtle">{calendar.summary}</span>
+                      <div className="ml-auto flex items-center gap-1.5 flex-wrap">
+                        {(calendar.legend || []).map((l, l__i) => (
+                          <span key={l__i} className="fass-badge is-sm" style={l.style}>{l.label}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="fass-scroll overflow-x-auto">
+                      <div className="min-w-[680px] max-w-[1120px] grid grid-cols-7 gap-1.5">
+                        {(calendar.weekdays || []).map((w, w__i) => (
+                          <div
+                            key={"wd" + w__i}
+                            className={[
+                              "fass-cal-wd",
+                              w__i === 5 ? "is-sat" : "",
+                              w__i === 6 ? "is-sun" : "",
+                            ].filter(Boolean).join(" ")}
+                          >
+                            {w}
+                          </div>
+                        ))}
+                        {(calendar.cells || []).map((c) => (
+                          c.isBlank ? (
+                            <div key={c.k} aria-hidden="true" />
+                          ) : (
+                            <div
+                              key={c.k}
+                              className={[
+                                "fass-cal-cell",
+                                c.isHoliday ? "is-holiday" : "",
+                                c.isToday ? "is-today" : "",
+                              ].filter(Boolean).join(" ")}
+                            >
+                              <div className="flex items-center justify-between gap-1">
+                                <span
+                                  className={[
+                                    "fass-cal-cell__day",
+                                    c.isSat ? "is-sat" : "",
+                                    c.isSun ? "is-sun" : "",
+                                  ].filter(Boolean).join(" ")}
+                                >
+                                  {c.day}
+                                </span>
+                                <span className="fass-badge is-sm" style={c.badgeStyle}>{c.state}</span>
+                              </div>
+                              <select
+                                className="fass-field is-sm"
+                                aria-label={c.dateStr + " 마감 상태"}
+                                value={c.state}
+                                onChange={c.onChange}
+                              >
+                                {(c.options || []).map((o, o__i) => (
+                                  <option key={o__i} value={o}>{o}</option>
+                                ))}
+                              </select>
+                              <span className="fass-cal-cell__note">{c.note}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="fass-note__body">{calendar.note}</p>
+                  </div>
+                ) : (
                 <div className="fass-scroll bg-[var(--fass-surface)] border border-t-0 border-[var(--fass-line)] rounded-b-[var(--fass-radius-lg)] overflow-auto max-h-[min(52vh,460px)]">
                   <table className="fass-table">
                     <thead>
@@ -291,6 +387,7 @@ export function Shell({ v }) {
                     ) : null}
                   </table>
                 </div>
+                )}
               </div>
 
               {mergeNote ? (
@@ -490,7 +587,7 @@ export function Shell({ v }) {
                     ))}
                   </div>
 
-                  <section className="fass-panel">
+                  <section className="fass-panel xl:sticky xl:top-0">
                     <div className="fass-panel__head">
                       <strong className="fass-title-section">레이어 구성</strong>
                       <span className="fass-subtle">외부망 → 데이터</span>
@@ -620,9 +717,64 @@ export function Shell({ v }) {
               ))}
             </div>
           ) : null}
+
+          {isTokens ? (
+            <div className="flex flex-col gap-5">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+                {(tokenMetrics || []).map((m, m__i) => (
+                  <div key={m__i} className="fass-metric">
+                    <span className="fass-label leading-none">{m.label}</span>
+                    <span style={m.valueStyle}>{m.value}</span>
+                    <span className="fass-subtle leading-snug">{m.note}</span>
+                  </div>
+                ))}
+              </div>
+
+              {(tokenGroups || []).map((g, g__i) => (
+                <section key={g__i} className="fass-panel">
+                  <div className="fass-panel__head">
+                    <strong className="fass-title-section shrink-0">{g.title}</strong>
+                    <span className="fass-subtle min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{g.note}</span>
+                    <span className="fass-badge ml-auto shrink-0" style={g.tagStyle}>{g.tag}</span>
+                  </div>
+                  <div className="fass-scroll overflow-x-auto">
+                    <table className="fass-table min-w-[1080px]">
+                      <thead>
+                        <tr>
+                          <th className="w-[230px]">토큰 · 클래스</th>
+                          <th className="w-[150px]">값</th>
+                          <th className="w-[180px]">사용 위치</th>
+                          <th>디자인시스템에 없는 이유 · 배경</th>
+                          <th className="w-[96px]">사용</th>
+                          <th className="w-[120px]">조치</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(g.rows || []).map((r, r__i) => (
+                          <tr key={r__i}>
+                            <td className="font-mono text-[var(--font-size-xs)] font-semibold text-[var(--fass-accent-strong)] leading-snug break-words">{r.token}</td>
+                            <td className="font-mono text-[var(--font-size-xs)] leading-snug break-words">{r.value}</td>
+                            <td className="text-[var(--fass-muted)] leading-snug">{r.where}</td>
+                            <td className="text-[var(--fass-muted)] leading-snug text-pretty">{r.why}</td>
+                            <td><span className="fass-badge is-sm" style={r.stateStyle}>{r.state}</span></td>
+                            <td className="text-[var(--fass-text)] font-semibold text-[var(--font-size-xs)] leading-snug">{r.action}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              ))}
+
+              <details className="fass-note-details">
+                <summary>대조 기준</summary>
+                <p className="fass-note-details__body">{tokenNote}</p>
+              </details>
+            </div>
+          ) : null}
         </div>
 
-        <footer className="h-9 shrink-0 flex items-center justify-between gap-3 px-5 bg-[var(--fass-surface)] border-t border-[var(--fass-line)] text-[var(--font-size-xs)] text-[var(--fass-muted)]">
+        <footer className="h-9 shrink-0 flex items-center justify-between gap-3 px-4 md:px-5 xl:px-6 bg-[var(--fass-surface)] border-t border-[var(--fass-line)] text-[var(--font-size-xs)] text-[var(--fass-muted)]">
           <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{statusLeft}</span>
           <span className="hidden lg:block shrink-0">{statusRight}</span>
         </footer>
@@ -638,68 +790,107 @@ export function Shell({ v }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="fass-modal-title"
-            className="w-full max-w-[560px] max-h-[80vh] flex flex-col overflow-hidden bg-[var(--fass-surface)] border border-[var(--fass-line)] rounded-[var(--fass-radius-lg)] shadow-[var(--shadow-md)]"
+            className={[
+              "w-full flex flex-col overflow-hidden bg-[var(--fass-surface)] border border-[var(--fass-line)] rounded-[var(--fass-radius-lg)] shadow-[var(--shadow-md)]",
+              modalIsConfirm ? "max-w-[320px]" : "max-w-[512px]",
+            ].join(" ")}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2.5 h-12 px-4 border-b border-[var(--fass-line)] shrink-0">
-              <strong id="fass-modal-title" className="fass-title-section text-[var(--font-size-md)]">{modalTitle}</strong>
-              <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap fass-subtle">{modalSub}</span>
-              <button
-                ref={modalCloseRef}
-                type="button"
-                className="fass-btn is-icon ml-auto shrink-0"
-                aria-label="닫기"
-                onClick={closeModal}
-              >
-                ×
-              </button>
-            </div>
+            {modalIsConfirm ? (
+              <div className="fass-scroll flex flex-col gap-1.5 px-4 pt-5 pb-3 overflow-y-auto max-h-[calc(100svh-140px)]">
+                <strong id="fass-modal-title" className="fass-title-section">{modalTitle}</strong>
+                {modalSub ? <span className="fass-subtle leading-relaxed">{modalSub}</span> : null}
+                {(modalLines || []).map((line, line__i) => (
+                  <span key={line__i} className="text-[var(--font-size-xs)] text-[var(--fass-muted)] leading-relaxed">{line}</span>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2.5 h-12 px-4 border-b border-[var(--fass-line)] shrink-0">
+                  <strong id="fass-modal-title" className="fass-title-section">{modalTitle}</strong>
+                  <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap fass-subtle">{modalSub}</span>
+                  <button
+                    ref={modalCloseRef}
+                    type="button"
+                    className="fass-btn is-icon ml-auto shrink-0"
+                    aria-label="닫기"
+                    onClick={closeModal}
+                  >
+                    ×
+                  </button>
+                </div>
 
-            <div className="fass-scroll flex-1 overflow-y-auto p-4">
-              {modalIsForm ? (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-3 gap-y-2.5">
-                  {(modalFields || []).map((f, f__i) => (
-                    <div key={f__i} className="flex flex-col gap-1">
-                      <label className="fass-label">{f.label}</label>
-                      <input className="fass-field" value={f.value ?? ""} onChange={f.onChange} placeholder={f.placeholder} />
+                <div className="fass-scroll overflow-y-auto max-h-[calc(100svh-200px)] p-4">
+                  {modalIsForm ? (
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-3">
+                      {(modalFields || []).map((f, f__i) => (
+                        <div key={f__i} className="flex flex-col gap-1">
+                          <label className="fass-label" htmlFor={"fass-mf-" + f__i}>{f.label}</label>
+                          <input
+                            id={"fass-mf-" + f__i}
+                            className={["fass-field", f.isNum ? "is-num" : ""].filter(Boolean).join(" ")}
+                            type={f.type}
+                            required={f.required}
+                            inputMode={f.isNum ? "decimal" : undefined}
+                            value={f.value ?? ""}
+                            onChange={f.onChange}
+                            placeholder={f.placeholder}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : null}
-              {modalIsRec ? (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-3 gap-y-2.5">
-                  {(modalRecFields || []).map((f, f__i) => (
-                    <div key={f__i} style={f.cellStyle}>
-                      <label className="fass-label">{f.label}</label>
-                      {f.isSelect ? (
-                        <select className="fass-field" value={f.value} onChange={f.onChange}>
-                          {(f.options || []).map((o, o__i) => (
-                            <option key={o__i} value={o}>{o}</option>
-                          ))}
-                        </select>
-                      ) : null}
-                      {f.isText ? (
-                        <input className="fass-field" value={f.value} onChange={f.onChange} placeholder={f.placeholder} />
-                      ) : null}
-                      {f.isArea ? (
-                        <textarea className="fass-field" value={f.value} onChange={f.onChange} placeholder={f.placeholder} rows={3} />
-                      ) : null}
+                  ) : null}
+                  {modalIsRec ? (
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-3">
+                      {(modalRecFields || []).map((f, f__i) => (
+                        <div key={f__i} style={f.cellStyle}>
+                          <label className="fass-label" htmlFor={"fass-mr-" + f__i}>{f.label}</label>
+                          {f.isSelect ? (
+                            <select id={"fass-mr-" + f__i} className="fass-field" value={f.value} onChange={f.onChange}>
+                              {(f.options || []).map((o, o__i) => (
+                                <option key={o__i} value={o}>{o}</option>
+                              ))}
+                            </select>
+                          ) : null}
+                          {f.isText ? (
+                            <input
+                              id={"fass-mr-" + f__i}
+                              className={["fass-field", f.isNum ? "is-num" : ""].filter(Boolean).join(" ")}
+                              inputMode={f.isNum ? "decimal" : undefined}
+                              value={f.value}
+                              onChange={f.onChange}
+                              placeholder={f.placeholder}
+                            />
+                          ) : null}
+                          {f.isArea ? (
+                            <textarea id={"fass-mr-" + f__i} className="fass-field" value={f.value} onChange={f.onChange} placeholder={f.placeholder} rows={3} />
+                          ) : null}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : null}
                 </div>
-              ) : null}
-              {modalIsConfirm ? (
-                <div className="flex flex-col gap-2">
-                  {(modalLines || []).map((line, line__i) => (
-                    <span key={line__i} className="text-[var(--font-size-md)] text-[var(--fass-text)] leading-relaxed">{line}</span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+              </>
+            )}
 
-            <div className="flex items-center justify-end gap-1.5 px-4 py-3 border-t border-[var(--fass-line)] shrink-0">
-              <button type="button" className="fass-btn is-ghost" onClick={closeModal}>취소</button>
-              <button type="button" className={modalConfirmClass} onClick={submitModal}>{modalConfirmLabel}</button>
+            <div
+              className={[
+                "flex items-center gap-3 px-4 py-3 shrink-0",
+                modalIsConfirm ? "" : "border-t border-[var(--fass-line)]",
+              ].join(" ")}
+            >
+              {modalError ? <span className="fass-error min-w-0" role="alert">{modalError}</span> : null}
+              <div className="ml-auto flex items-center gap-1.5 shrink-0">
+                <button
+                  ref={modalIsConfirm ? modalCloseRef : null}
+                  type="button"
+                  className="fass-btn is-ghost is-sm"
+                  onClick={closeModal}
+                >
+                  취소
+                </button>
+                <button type="button" className={modalConfirmClass} onClick={submitModal}>{modalConfirmLabel}</button>
+              </div>
             </div>
           </section>
         </div>
