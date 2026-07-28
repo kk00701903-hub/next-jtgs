@@ -1,0 +1,30 @@
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+--fass-navy:#1A3A6B;--fass-navy-deep:#142d52;
+--fass-accent:#2563EB;--fass-accent-strong:#1D4ED8;--fass-accent-soft:#DBEAFE;--fass-accent-line:#BFDBFE;
+--fass-bg:#F1F5F9;--fass-surface:#FFFFFF;--fass-surface-alt:#F8FAFC;
+--fass-line:#E2E8F0;--fass-line-soft:#F1F5F9;--fass-line-strong:#CBD5E1;
+--fass-text:#1E293B;--fass-muted:#64748B;--fass-subtle:#94A3B8;
+--fass-success:#16A34A;--fass-success-soft:#DCFCE7;
+--fass-warning:#D97706;--fass-warning-soft:#FEF3C7;
+--fass-danger:#DC2626;--fass-danger-soft:#FEE2E2;
+--fass-radius-sm:3px;--fass-radius-md:6px;--fass-radius-lg:10px;
+--fass-button-height-xs:24px;--fass-button-height-sm:28px;--fass-button-height-md:32px;--fass-button-height-lg:38px;
+--fass-button-padding-x-xs:8px;--fass-button-padding-x-sm:10px;--fass-button-padding-x-md:14px;--fass-button-padding-x-lg:18px;
+--fass-button-font-size:12px;--fass-button-radius:6px;
+--fass-badge-height-sm:18px;--fass-badge-height-md:20px;--fass-badge-height-lg:24px;
+--fass-badge-font-size:11px;--fass-badge-radius:999px;
+--font-size-xs:11px;--font-size-sm:12px;--font-size-md:13px;--font-size-lg:16px;--font-size-xl:20px;
+--shadow-sm:0 1px 3px rgba(15,23,42,.08);--shadow-md:0 4px 12px rgba(15,23,42,.10);
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--fass-bg);color:var(--fass-text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--fass-accent);text-decoration:none}
+a:hover{color:var(--fass-accent-strong);text-decoration:underline}
+button,input,select{font-family:inherit}
+::selection{background:var(--fass-accent-soft)}
+:focus-visible{outline:2px solid var(--fass-accent);outline-offset:1px}
+.fass-scroll::-webkit-scrollbar{width:6px;height:6px}
+.fass-scroll::-webkit-scrollbar-thumb{background:var(--fass-line-strong);border-radius:999px}
+.fass-scroll::-webkit-scrollbar-track{background:transparent}
