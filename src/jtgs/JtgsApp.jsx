@@ -1,7 +1,7 @@
 import { Component as ReactComponent, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  B, HISTORY_COLS, HISTORY_ROWS, CHECK_GROUPS, CHECK_METRICS,
+  B, CHECK_GROUPS, CHECK_METRICS,
   FUEL_FILTERS, ACTIONS,
   GROUPS, CONFIRM_TEXT, MERGE_NOTE, DASH, LAYERS,
   AREA_LIST, AREA_TONE, REC_SPEC, HOLIDAYS, CLOSE_CAL_NOTE,
@@ -122,26 +122,6 @@ class JtgsAppCore extends ReactComponent {
     }
     if (label === "엑셀" || label === "인쇄" || label === "상세 보기") {
       this.props.patchStore({ msg: label + " 요청 처리됨 · " + t.label });
-      return;
-    }
-    // FR-06-02: force error tab context for retry
-    if (label === "오류 재처리" && view === "if") {
-      const errCount = (t.rows || []).filter((r) => r.some((c) => /:(red|warn)$/.test(String(c)))).length;
-      this.props.patchStore({
-        tab: "err",
-        modal: {
-          kind: "ifRetry",
-          title: "오류 재처리",
-          sub: t.label + " · JTGS" + t.code,
-          lines: [
-            "오류·주의 상태 " + errCount + "건을 다시 전송합니다.",
-            "재처리 대상은 '오류·차이 목록' 탭 기준입니다.",
-          ],
-          confirmLabel: "재처리 실행",
-          ifKey: view + ":" + segKey,
-          danger: false,
-        },
-      });
       return;
     }
     if (label === "등록" || label === "수정") {
@@ -351,16 +331,6 @@ class JtgsAppCore extends ReactComponent {
     this.props.store.select(gk, k);
   }
 
-  groupTabs(view, t) {
-    if (view !== "if") return t.tabs;
-    const errRaw = t.rows.filter((r) => r.some((c) => /:(red|warn)$/.test(String(c))));
-    return [
-      { key: "all", label: "전체 내역", title: "IF 전송 대상 내역", cols: t.cols, rows: t.rows, foot: t.foot },
-      { key: "err", label: "오류·차이 목록", title: "오류·차이 발생 목록", cols: t.cols, rows: errRaw, foot: null },
-      { key: "hist", label: "전송 이력", title: "IF 전송 이력", cols: HISTORY_COLS, rows: HISTORY_ROWS, foot: null },
-    ];
-  }
-
   renderVals() {
     const view = this.props.store.view;
     const G = GROUPS[view];
@@ -377,19 +347,20 @@ class JtgsAppCore extends ReactComponent {
     ];
     Object.keys(GROUPS).forEach((gk) => {
       navRows.push({ isGroup: true, label: GROUPS[gk].navLabel });
-      // 리디자인 소스(JTGS010140~170 통합)는 세그먼트가 아닌 단독 화면으로 진입한다
-      if (gk === "if") {
-        navRows.push({
-          isItem: true, key: "ifhub", label: "IF 연계 통합 현황", mark: "▸",
-          onClick: () => this.props.store.setView("ifhub"),
-        });
-      }
       Object.keys(GROUPS[gk].items).forEach((k) => {
         navRows.push({
           isItem: true, key: gk + ":" + k, label: GROUPS[gk].items[k].label, mark: "▹", merged: true,
           onClick: () => this.select(gk, k),
         });
       });
+      // IF 연계는 리디자인 통합 화면 한 개가 담당한다 (기준정보 다음 자리 유지)
+      if (gk === "master") {
+        navRows.push({ isGroup: true, label: "IF 연계" });
+        navRows.push({
+          isItem: true, key: "ifhub", label: "IF 연계 통합 현황", mark: "▸",
+          onClick: () => this.props.store.setView("ifhub"),
+        });
+      }
     });
     navRows.push({ isGroup: true, label: "시스템 아키텍처" });
     navRows.push({ isItem: true, key: "arch", label: "기술 스택", mark: "▸", onClick: () => this.props.store.setView("arch") });
@@ -413,7 +384,7 @@ class JtgsAppCore extends ReactComponent {
       };
     });
 
-    const tabList = isGrid ? this.groupTabs(view, t) : [];
+    const tabList = isGrid ? t.tabs : [];
     const curTab = isGrid ? (tabList.find((x) => x.key === this.props.store.tab) || tabList[0]) : null;
     const activeTab = curTab ? curTab.key : null;
     const calBase = this.props.store.filterApplied["마감일자"] || this.props.store.filterDraft["마감일자"] || todayStr();
@@ -437,12 +408,7 @@ class JtgsAppCore extends ReactComponent {
     const isCalTab = isGrid && curTab.kind === "calendar";
     const calendar = isCalTab ? this.buildCalendar(calBase) : null;
     const isCodeMaster = view === "master" && segKey === "code";
-    const overrideKey = view + ":" + segKey;
-    const baseRaw = isGrid
-      ? (isCodeMaster
-        ? this.codeRows()
-        : (this.props.store.ifRowOverrides[overrideKey] || curTab.rows))
-      : [];
+    const baseRaw = isGrid ? (isCodeMaster ? this.codeRows() : curTab.rows) : [];
     const rawRows = isGrid ? filterRows(baseRaw, cols, this.props.store.filterApplied || {}) : [];
     const rows = isGrid ? this.buildRows(rawRows, cols) : [];
     const footSrc = isGrid ? curTab.foot : null;
@@ -580,29 +546,6 @@ class JtgsAppCore extends ReactComponent {
       submitModal: () => {
         if (m && m.kind === "rec") { this.saveRec(m.target); return; }
         if (m && m.kind === "recDelete") { this.deleteRec(m.target); return; }
-        if (m && m.kind === "ifRetry") {
-          const key = m.ifKey;
-          const G0 = GROUPS.if;
-          const sk = key.split(":")[1];
-          const src = (G0.items[sk] && G0.items[sk].rows) || [];
-          const next = src.map((row) => row.map((c) => {
-            const s = String(c);
-            if (/:(red|warn)$/.test(s)) return s.replace(/:(red|warn)$/, ":green").replace(/^오류|^처리중|^차이발생|^검증대기/, "처리완료");
-            return c;
-          }));
-          // normalize badge text for known error statuses
-          const fixed = next.map((row) => row.map((c) => {
-            const s = String(c);
-            if (s.endsWith(":green") && /오류|처리중|차이발생|검증대기|미처리/.test(s.split(":")[0])) {
-              return "처리완료:green";
-            }
-            return c;
-          }));
-          this.props.store.setIfRowOverrides(key, fixed);
-          this.props.patchStore({ modal: null, msg: "오류 재처리 완료 · " + fixed.filter((r) => r.some((c) => String(c).includes("처리완료"))).length + "건 반영(목업)", tab: "all" });
-          this.props.queryClient?.invalidateQueries?.({ queryKey: ["grid"] });
-          return;
-        }
         if (m && m.kind === "form") {
           const fields = (m.fields || []).map((f) => ({
             k: f.k || f.label, label: f.label, required: f.required !== false, kind: f.kind,

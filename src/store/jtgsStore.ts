@@ -50,7 +50,6 @@ type JtgsState = {
   modalError: string
   /** 요구 2: 일마감 캘린더에서 일자별로 직접 바꾼 open/close 상태 */
   closeStates: Record<string, string>
-  ifRowOverrides: Record<string, string[][]>
   setView: (view: string) => void
   select: (gk: string, k: string) => void
   setTab: (tab: string | null) => void
@@ -74,7 +73,6 @@ type JtgsState = {
   toggleFavorite: (key: string) => void
   setModalError: (modalError: string) => void
   setCloseState: (date: string, state: string) => void
-  setIfRowOverrides: (key: string, rows: string[][]) => void
 }
 
 export const useJtgsStore = create<JtgsState>((set) => ({
@@ -97,7 +95,6 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   favorites: {},
   modalError: '',
   closeStates: {},
-  ifRowOverrides: {},
   setView: (view) => set({ view, tab: null, sel: null, msg: '', sidebarOpen: false, collapsed: true }),
   select: (gk, k) =>
     set((s) => ({
@@ -138,6 +135,4 @@ export const useJtgsStore = create<JtgsState>((set) => ({
   setModalError: (modalError) => set({ modalError }),
   setCloseState: (date, state) =>
     set((s) => ({ closeStates: { ...s.closeStates, [date]: state } })),
-  setIfRowOverrides: (key, rows) =>
-    set((s) => ({ ifRowOverrides: { ...s.ifRowOverrides, [key]: rows } })),
 }))
