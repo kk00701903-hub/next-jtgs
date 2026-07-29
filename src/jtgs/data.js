@@ -148,6 +148,22 @@ export const HISTORY_ROWS = [
 
 export const CHECK_GROUPS = [
   {
+    title: "리디자인 TSX 세트", note: "JTGS 전체 화면 리디자인 · 소스 12개 + README",
+    items: [
+      { name: "pages/jtgs010140-if-integration", status: "반영", note: "IF 연계 통합 현황. 사이드바 'IF 연계 > IF 연계 통합 현황' 및 대시보드 'IF 오류 재처리' 바로가기로 진입." },
+      { name: "organisms/jtgs-if-header-grid", status: "반영", note: "인터페이스 4종 집계 그리드. 행 클릭으로 라인 그리드 전환, 체크박스로 인터페이스 단위 일괄 처리." },
+      { name: "organisms/jtgs-if-line-grid", status: "반영", note: "통합 모드에서 IF별 금액 컬럼 4개 + sticky 합계 행. 단일 IF 선택 시 원본 컬럼셋 그대로 표시." },
+      { name: "organisms/jtgs-if-action-bar", status: "반영", note: "마감·마감취소·전송·오류 재처리. 선택 상태에 따라 활성 여부와 비활성 사유 툴팁을 계산." },
+      { name: "molecules/jtgs-summary-tiles · step-chip", status: "반영", note: "진행상태 5분할 요약 타일과 상태·인터페이스 다중 선택 필터 칩." },
+      { name: "atoms/jtgs-step-badge · jtgs-check", status: "반영", note: "진행상태 배지(색각 보조 기호 옵션)와 16px 그리드 체크박스(indeterminate 지원)." },
+      { name: "lib/jtgs-if-logic · types · data seed", status: "반영", note: "전송결과→진행단계 매핑, 헤더 집계, 라인 정규화, 상태 전이. 시드는 목업이며 조회 API로 교체 예정." },
+      { name: "tokens/jtgs-tokens.css", status: "반영", note: "--jtgs-* 화면 전용 토큰 16종을 main.tsx에서 로드. --fass-* 전역 토큰과 별도 계층으로 유지." },
+      { name: "shadcn 프리미티브 · cn()", status: "수정", note: "소스가 참조하는 @/components/ui/* 대신 FassButton·cn 어댑터를 만들어 기존 .fass-* 클래스에 연결. @ 경로 alias를 추가해 전달 파일의 import 문은 그대로 유지." },
+      { name: "전달 파일 조정 7개", status: "수정", note: "① 미사용 React import 제거 4개(tsc noUnusedLocals) ② 페이지 내부 제목 블록 제거 1개(Shell 헤더가 제목·설명·즐겨찾기 담당) ③ 그리드 체크박스 aria-label 추가 2개. 재전달 시 같은 조정만 다시 적용하면 됩니다." },
+      { name: "유류 실적 · 일마감 · 대시보드 리디자인", status: "미반영", note: "이번 export 범위 밖(README 기준 IF 화면만 포함). 동일 규약으로 추가 전달되면 같은 방식으로 반영." },
+    ],
+  },
+  {
     title: "프론트 스택 · 배포", note: "Vite · Pages · PWA",
     items: [
       { name: "Vite + React 19", status: "반영", note: "GitHub Pages CSR(/next-jtgs/). Next.js/SSR은 목표 아키텍처로 문서에만 표기." },
@@ -219,6 +235,7 @@ export const CHECK_GROUPS = [
 ];
 
 export const CHECK_METRICS = [
+  { label: "리디자인 TSX 반영", value: "12건", tone: "accent", note: "IF 연계 통합 화면 세트 · 전달 파일 조정 7개" },
   { label: "차세대 소스 대조", value: "32건", note: "atoms 16 · molecules 10 · organisms 6" },
   { label: "규격 반영", value: "14건", tone: "success", note: "버튼·배지·필드·툴바·패널·모달 등" },
   { label: "부분 반영", value: "5건", tone: "warning", note: "프로그레스·스켈레톤·툴팁·지표·숫자입력" },
@@ -965,7 +982,7 @@ export const DASH = {
   ],
   jump: [
     { label: "일마감 처리", note: "2곳 미완료", view: "close", key: "daily" },
-    { label: "IF 오류 재처리", note: "78건 대기", view: "if", key: "cash" },
+    { label: "IF 오류 재처리", note: "78건 대기", view: "ifhub", key: "" },
     { label: "매출 현황", note: "오늘 집계", view: "sales", key: "sales" },
     { label: "POS·VAN 대조", note: "불일치 7건", view: "sales", key: "posvan" },
     { label: "재고 조회", note: "전체 주유소", view: "stock", key: "status" },

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { JtgsIfIntegrationPage } from "../pages/jtgs010140-if-integration.tsx";
 
 export function Shell({ v }) {
   const navScrollTimer = useRef(null);
@@ -18,7 +19,7 @@ export function Shell({ v }) {
     headTitle, headSub, summary, expanded, collapseLabel, toggleCollapse, doSearch, doResetFilters,
     filters, metrics, gridTitle, gridCount, mergeNote, actions, calendar,
     segLabel, segNote,
-    isGrid, isDash, isArch, isReq, isCheck, isTokens,
+    isGrid, isDash, isArch, isReq, isCheck, isTokens, isIfHub,
     checkGroups, checkMetrics,
     tokenGroups, tokenMetrics, tokenNote,
     dashKpis, dashStations, dashTanks, dashIf, dashLog, dashJump, dashTankAlert,
@@ -163,7 +164,16 @@ export function Shell({ v }) {
           <button type="button" className="fass-btn is-secondary is-sm shrink-0" onClick={refreshAll}>새로고침</button>
         </header>
 
-        <div className="fass-scroll flex-1 overflow-y-auto flex flex-col gap-5 px-4 md:px-5 xl:px-6 py-4 [&>*]:w-full [&>*]:max-w-[1800px] [&>*]:mx-auto">
+        <div
+          className={[
+            "fass-scroll flex-1 overflow-y-auto flex flex-col gap-5",
+            // 리디자인 화면은 자체 여백(p-5)을 갖고 있어 컨테이너 패딩을 비운다
+            isIfHub ? "" : "px-4 md:px-5 xl:px-6 py-4",
+            "[&>*]:w-full [&>*]:max-w-[1800px] [&>*]:mx-auto",
+          ].filter(Boolean).join(" ")}
+        >
+          {isIfHub ? <JtgsIfIntegrationPage /> : null}
+
           {isGrid ? (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3 flex-wrap">

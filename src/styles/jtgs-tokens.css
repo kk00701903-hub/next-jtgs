@@ -1,0 +1,34 @@
+:root {
+  --jtgs-surface: #ffffff;
+  --jtgs-canvas: #f5f7fa;
+  --jtgs-line: #e6ebf1;
+  --jtgs-line-soft: #f1f5f9;
+  --jtgs-text: #0f172a;
+  --jtgs-text-muted: #475569;
+  --jtgs-text-dim: #94a3b8;
+
+  --jtgs-row-hover: #f5f9ff;
+  --jtgs-row-selected: #edf3e7;
+  --jtgs-row-selected-hover: #e3eeff;
+  --jtgs-foot-bg: #f0f4f9;
+
+  --jtgs-step-gray-fg: #64748b;
+  --jtgs-step-gray-bg: #f1f5f9;
+  --jtgs-step-gray-bd: #e2e8f0;
+
+  --jtgs-step-blue-fg: #1d4ed8;
+  --jtgs-step-blue-bg: #eef4ff;
+  --jtgs-step-blue-bd: #c7dbff;
+
+  --jtgs-step-green-fg: #15803d;
+  --jtgs-step-green-bg: #edf7ee;
+  --jtgs-step-green-bd: #bfe3c6;
+
+  --jtgs-step-red-fg: #b42318;
+  --jtgs-step-red-bg: #fdefee;
+  --jtgs-step-red-bd: #f7c9c4;
+
+  --jtgs-kind-fg: #0a6e86;
+  --jtgs-kind-bg: #e6f4f9;
+  --jtgs-kind-bd: #9fd3e2;
+}

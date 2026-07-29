@@ -377,6 +377,13 @@ class JtgsAppCore extends ReactComponent {
     ];
     Object.keys(GROUPS).forEach((gk) => {
       navRows.push({ isGroup: true, label: GROUPS[gk].navLabel });
+      // 리디자인 소스(JTGS010140~170 통합)는 세그먼트가 아닌 단독 화면으로 진입한다
+      if (gk === "if") {
+        navRows.push({
+          isItem: true, key: "ifhub", label: "IF 연계 통합 현황", mark: "▸",
+          onClick: () => this.props.store.setView("ifhub"),
+        });
+      }
       Object.keys(GROUPS[gk].items).forEach((k) => {
         navRows.push({
           isItem: true, key: gk + ":" + k, label: GROUPS[gk].items[k].label, mark: "▹", merged: true,
@@ -464,7 +471,7 @@ class JtgsAppCore extends ReactComponent {
       const warnTanks = dash.tanks.filter((s) => s.fuels.some((f) => f.tone === "warning")).length;
       return {
       isGrid, isCheck: view === "check", isTokens: view === "tokens", isDash, actions,
-      isArch: view === "arch", isReq: view === "req",
+      isArch: view === "arch", isReq: view === "req", isIfHub: view === "ifhub",
       stackAreas: AREA_LIST.map((area) => {
         const tone = AREA_TONE[area];
         const rows = this.props.store.stack.map((r, i) => ({ r, i })).filter((x) => x.r.area === area);
@@ -608,8 +615,8 @@ class JtgsAppCore extends ReactComponent {
         this.props.patchStore({ modal: null, msg: (m ? m.title : "") + " 처리 완료 · " + (t ? t.label : "") });
       },
       navRows, segments, tabs, cols, rows, foot, hasFoot,
-      headTitle: isGrid ? t.title : (isDash ? "통합 대시보드" : view === "arch" ? "기술 스택 · 아키텍처" : view === "req" ? "요구사항 정의" : view === "tokens" ? "디자인시스템 토큰 대조" : "소스 반영 점검"),
-      headSub: isGrid ? t.sub : (isDash ? "· 전체 주유소 운영 현황" : view === "arch" ? "· Vite·React 적용 스택 · 백엔드는 목표(미연동)" : view === "req" ? "· 기능(FR) · 비기능(NFR) · 프론트 목업 반영" : view === "tokens" ? "· 차세대 소스 32개 파일 참조 토큰 43종 대비 앱 정의 63종" : "· Vite 프론트 스택 대비 점검 결과"),
+      headTitle: isGrid ? t.title : (isDash ? "통합 대시보드" : view === "arch" ? "기술 스택 · 아키텍처" : view === "req" ? "요구사항 정의" : view === "tokens" ? "디자인시스템 토큰 대조" : view === "ifhub" ? "IF 연계 통합 현황" : "소스 반영 점검"),
+      headSub: isGrid ? t.sub : (isDash ? "· 전체 주유소 운영 현황" : view === "arch" ? "· Vite·React 적용 스택 · 백엔드는 목표(미연동)" : view === "req" ? "· 기능(FR) · 비기능(NFR) · 프론트 목업 반영" : view === "tokens" ? "· 차세대 소스 32개 파일 참조 토큰 43종 대비 앱 정의 63종" : view === "ifhub" ? "· 외상·선입금 · 현금매출 · 신용체크카드 · 카드결제 실적 4종을 한 화면에서 마감·전송" : "· Vite 프론트 스택 대비 점검 결과"),
       summary: isGrid ? t.summary : "",
       expanded: !this.props.store.collapsed,
       collapseLabel: this.props.store.collapsed ? "펼치기" : "접기",
@@ -728,7 +735,7 @@ class JtgsAppCore extends ReactComponent {
       })),
       dashJump: dash.jump.map((j) => ({
         label: j.label, note: j.note,
-        onClick: () => this.select(j.view, j.key),
+        onClick: () => (GROUPS[j.view] ? this.select(j.view, j.key) : this.props.store.setView(j.view)),
       })),
       statusLeft: this.props.store.msg || (isGrid
         ? "[2026-07-27 16:04] " + t.label + " " + rawRows.length + "건 조회"
@@ -736,8 +743,9 @@ class JtgsAppCore extends ReactComponent {
         : view === "arch" ? "Vite 프론트 적용 · 백엔드/IAM은 목표(미연동)"
         : view === "req" ? "요구사항 정의 · 프론트 목업 반영분 표시"
         : view === "tokens" ? "토큰 대조 · 앱 전용 24종 · 소스 전용 4종 · 미사용 7종"
+        : view === "ifhub" ? "IF 연계 통합 · 리디자인 TSX 컴포넌트 세트 적용 · 상태 전이는 목업"
         : "프론트 스택·요구사항 점검 결과"),
-      statusRight: "2026-07-27 16:04 기준 · " + (isGrid ? "JTGS" + t.code : isDash ? "통합 대시보드" : view === "arch" ? "기술 스택" : view === "req" ? "요구사항" : view === "tokens" ? "토큰 대조" : "소스 점검") + " · 한성민 프로",
+      statusRight: "2026-07-27 16:04 기준 · " + (isGrid ? "JTGS" + t.code : isDash ? "통합 대시보드" : view === "arch" ? "기술 스택" : view === "req" ? "요구사항" : view === "tokens" ? "토큰 대조" : view === "ifhub" ? "JTGS010140·150·160·170" : "소스 점검") + " · 한성민 프로",
     };
   }
 
